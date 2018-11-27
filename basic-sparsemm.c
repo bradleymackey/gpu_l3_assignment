@@ -5,8 +5,11 @@
 #include "utils.h"
 
 /* Compute C = C + A*B in dense, column major, format. */
+// column major = first go DOWN the first column, then DOWN the second column etc.
 static void dgemm(int m, int n, int k, const double *a, const double *b, double *c)
 {
+    // m = rows
+    // n = columns
     int i, j, p;
     int lda = m;
     int ldb = k;
@@ -27,14 +30,26 @@ static void dgemm(int m, int n, int k, const double *a, const double *b, double 
  */
 void basic_sparsemm(const COO A, const COO B, COO *C)
 {
+    // pointers to the elements of each matrix
     double *a = NULL;
     double *b = NULL;
     double *c = NULL;
+    
+    // m = A rows
+    // n = B columns
+    // k = A columns
     int m, n, k;
+    
+    // make them dense, allowing  for the simple dense algorithm
+    // `a` and `b` will be modified by having their value set to the address of the first double in the array
+    // each of these matrices is just represented as a list
     convert_sparse_to_dense(A, &a);
     convert_sparse_to_dense(B, &b);
 
     *C = NULL;
+    
+    // check to make sure that matrices are compatible sizes
+    // that is, A's n must match B's m for these to be compatible matrices that we can multiply together
     m = A->m;
     k = A->n;
     n = B->n;
@@ -45,6 +60,8 @@ void basic_sparsemm(const COO A, const COO B, COO *C)
         free(b);
         exit(1);
     }
+    
+    // allocate `c` and zero out the necessary memory in order to perform this multiplication
     alloc_dense(m, n, &c);
     zero_dense(m, n, c);
 

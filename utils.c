@@ -24,7 +24,7 @@ void alloc_dense(int m, int n, double **dense)
 {
   *dense = malloc(m*n*sizeof(**dense));
 }
-
+ 
 /*
  * Free a dense matrix
  * dense - dense matrix, may be NULL
