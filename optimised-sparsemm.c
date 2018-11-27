@@ -112,7 +112,7 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
     
     // offsets of row values in the b matrix
     // used to easily locate row values in B
-    const int *b_row_val_offsets = first_val_offsets(B, nzb, B->m);
+    int *b_row_val_offsets = first_val_offsets(B, nzb, B->m);
 
     // keep track of current values
     register int a_row, a_col, b_row, b_col;
