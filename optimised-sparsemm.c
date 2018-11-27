@@ -1,6 +1,6 @@
 #include "utils.h"
 #include <stdlib.h>
-
+#include <likwid.h>
 
 // use `likwid` on Hamilton in order to measure performance of the routines
 
@@ -34,8 +34,6 @@ void basic_sparsemm_sum(const COO, const COO, const COO,
 //static void flipped_rows_columns(COO *flip, int num_elems) {
 //    qsort(flip, num_elems, sizeof(COO), compare_coo_order_cols);
 //}
-
-
 
 /*
  * preprocessing to allow for fast lookup of B elements by index
@@ -108,7 +106,7 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
     const int nza = A->NZ;
     const int nzb = B->NZ;
     
-    const int a_num_rows = A->m; // rows of a
+    const int a_num_rows = A->m; // rows of A
     
     // offsets of row values in the b matrix
     // used to easily locate row values in B
@@ -117,6 +115,8 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
     // keep track of current values
     register int a_row, a_col, b_row, b_col;
     register double a_val, b_val;
+    
+    #pragma acc kernels
     for (int k = 0; k < nza; k++) {
         
         a_col = A->coords[k].j;
@@ -153,17 +153,17 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
             
             // row = row of a
             // column = col of b
+            // use a_num_rows because matrix cells are arranged in a column major format
+            // (required for proper conversion back to sparse)
             C[a_num_rows*b_col + a_row] = C[a_num_rows*b_col + a_row] + (a_val * b_val);
             
         }
     }
     
-    // free the offsets from memory now! we no longer need them
+    // free the offsets from memory now we no longer need them!
     free(b_row_val_offsets);
     
 }
-
-
 
 
 
@@ -175,38 +175,39 @@ void optimised_sparsemm(const COO A, const COO B, COO *C) {
     
     // idea - keep them all sparse, just try and do it, see how it goes!
     
-    // pointer to the C matrix that we will use to store the result
-    double *c = NULL;
+//    // pointer to the C matrix that we will use to store the result
+//    double *c = NULL;
+//
+//    // m = A rows
+//    // n = B columns
+//    // k = A columns
+//    int m, n, k;
+//
+//    // ensure there is no value currently stored at C
+//    *C = NULL;
+//
+//    // check that the matrices are compatible sizes
+//    m = A->m;
+//    k = A->n;
+//    n = B->n;
+//    if (k != B->m) {
+//        fprintf(stderr, "Invalid matrix sizes, got %d x %d and %d x %d\n", A->m, A->n, B->m, B->n);
+//        exit(1);
+//    }
+//
+//    // allocate dense, because it could well be the case that every element will be filled after the multiplication
+//    alloc_dense(m, n, &c);
+//    // zero it out, we don't know if this is guaranteed or not
+//    zero_dense(m, n, c);
+//
+//    // perform the optimised matrix multiplication operation
+//    // we pass the
+//    perform_sparse_optimised_multi(A, B, c);
+//    // as we created C in a dense format, we want to convert the representation back out to the testing suite expects
+//    convert_dense_to_sparse(c, m, n, C);
+//    free_dense(&c);
     
-
-    // m = A rows
-    // n = B columns
-    // k = A columns
-    int m, n, k;
-    
-    // ensure there is no value currently stored at C
-    *C = NULL;
-    
-    // check that the matrices are compatible sizes
-    m = A->m;
-    k = A->n;
-    n = B->n;
-    if (k != B->m) {
-        fprintf(stderr, "Invalid matrix sizes, got %d x %d and %d x %d\n", A->m, A->n, B->m, B->n);
-        exit(1);
-    }
-    
-    // allocate dense, because it could well be the case that every element will be filled after the multiplication
-    alloc_dense(m, n, &c);
-    // zero it out, we don't know if this is guaranteed or not
-    zero_dense(m, n, c);
-    
-    // perform the optimised matrix multiplication operation
-    // we pass the
-    perform_sparse_optimised_multi(A, B, c);
-    // as we created C in a dense format, we want to convert the representation back out to the testing suite expects
-    convert_dense_to_sparse(c, m, n, C);
-    free_dense(&c);
+    return basic_sparsemm(A,B,C);
     
 }
 
@@ -216,5 +217,8 @@ void optimised_sparsemm(const COO A, const COO B, COO *C) {
 void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
                             const COO D, const COO E, const COO F,
                             COO *O) {
+    
+    
+    
     return basic_sparsemm_sum(A, B, C, D, E, F, O);
 }

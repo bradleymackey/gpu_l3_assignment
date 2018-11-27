@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <likwid.h>
 
 #include "utils.h"
 
@@ -30,6 +31,10 @@ static void dgemm(int m, int n, int k, const double *a, const double *b, double 
  */
 void basic_sparsemm(const COO A, const COO B, COO *C)
 {
+    
+    LIKWID_MARKER_INIT;
+    
+    
     // pointers to the elements of each matrix
     double *a = NULL;
     double *b = NULL;
@@ -65,11 +70,16 @@ void basic_sparsemm(const COO A, const COO B, COO *C)
     alloc_dense(m, n, &c);
     zero_dense(m, n, c);
 
+    
+    LIKWID_MARKER_START("multi");
     dgemm(m, n, k, a, b, c);
+    LIKWID_MARKER_STOP("multi");
     free_dense(&a);
     free_dense(&b);
     convert_dense_to_sparse(c, m, n, C);
     free_dense(&c);
+    
+    LIKWID_MARKER_CLOSE;
 }
 
 /* Computes O = (A + B + C) (D + E + F) by converting to dense column
