@@ -11,26 +11,26 @@ void basic_sparsemm_sum(const COO, const COO, const COO,
 
 
 // compares 2 COOs, such that we can order by columns, for faster lookup
-int compare_coo_order_cols(const void *v1, const void *v2) {
-    COO coo1 = (COO)v1;
-    COO coo2 = (COO)v2;
-    int col_compare = coo1->coords->j - coo2->coords->i;
-    return col_compare;
-}
-
-
-/*
- * Flips the sparse representation to be in the format:
- * jn in vn
- * from:
- * in jn vn
- * this helps to lookup values by column when we are doing the multiplication by another matrix
- * in the current format, only row lookups are efficient due to the way the file is read into memory
- * returns a modifies the contents at the pointer location with the flipped rows and columns
- */
-static void flipped_rows_columns(COO *flip, int num_elems) {
-    qsort(flip, num_elems, sizeof(COO), compare_coo_order_cols);
-}
+//int compare_coo_order_cols(const void *v1, const void *v2) {
+//    COO coo1 = (COO)v1;
+//    COO coo2 = (COO)v2;
+//    int col_compare = coo1->coords->j - coo2->coords->i;
+//    return col_compare;
+//}
+//
+//
+///*
+// * Flips the sparse representation to be in the format:
+// * jn in vn
+// * from:
+// * in jn vn
+// * this helps to lookup values by column when we are doing the multiplication by another matrix
+// * in the current format, only row lookups are efficient due to the way the file is read into memory
+// * returns a modifies the contents at the pointer location with the flipped rows and columns
+// */
+//static void flipped_rows_columns(COO *flip, int num_elems) {
+//    qsort(flip, num_elems, sizeof(COO), compare_coo_order_cols);
+//}
 
 
 
@@ -49,8 +49,6 @@ static void flipped_rows_columns(COO *flip, int num_elems) {
  * space complexity: O(n)
  */
 static int *first_val_offsets(const COO B, int nzb, int rows_b) {
-    
-    printf("doing first val offsets\n");
     
     // where we will store resultant array
     int *result = (int*)malloc(rows_b*sizeof(int));
@@ -100,13 +98,9 @@ static int *first_val_offsets(const COO B, int nzb, int rows_b) {
         result[i] = -1;
     }
     
-    printf("done first val offsets\n");
-    
     return result;
     
 }
-
-
 
 
 static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) {
@@ -126,7 +120,7 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
     const int *b_row_val_offsets = first_val_offsets(B, nzb, B->m);
 
     // keep track of current values
-    int a_row, a_col, prev_a_row;
+    int a_row, a_col, b_row, b_col;
     double a_val, b_val;
     for (int k = 0; k < nza; k++) {
         
@@ -144,11 +138,9 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
         a_row = A->coords[k].i;
         a_val = A->data[k];
         
-        
         // we will perform up to `the number of rows of B` iterations - likley less unless a certain column of B is totally filled
         // iterate over all b column values while the row of b matches `a`'s column
         // (just ensures that we don't run past the row of b we are interested in or run over the end of the array)
-        int b_row, b_col;
         for (int p = 0; p < B->m; p++) {
             
             b_row = B->coords[b_offset+p].i;
@@ -156,6 +148,7 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
             if (a_col != b_row || b_offset+p >= nzb) {
                 // only continue if current `a` column is equal to the current `b` row
                 // and we have not gone into the next column of `b`
+                // otherwise, there is nothing else we can do for this given `a` entry
                 break;
             }
             
