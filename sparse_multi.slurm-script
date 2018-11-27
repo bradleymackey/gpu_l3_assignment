@@ -12,4 +12,4 @@ source /etc/profile.d/modules.sh
 module purge
 module load likwid
 module load intel/xe_2015.2
-./sparsemm 
+./optimised-sparsemm.o
