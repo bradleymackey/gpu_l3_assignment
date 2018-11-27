@@ -1,6 +1,9 @@
 #include "utils.h"
 #include <stdlib.h>
 
+
+// use `likwid` on Hamilton in order to measure performance of the routines
+
 // skeleton implementation from other files
 // will be able to be seen during compilation
 void basic_sparsemm(const COO, const COO, COO *);
@@ -101,7 +104,6 @@ static int *first_val_offsets(const COO B, int nzb, int rows_b) {
 
 static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) {
     
-    
     // the number of non-zero elements in A and B
     const int nza = A->NZ;
     const int nzb = B->NZ;
@@ -154,8 +156,10 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
             C[a_num_rows*b_col + a_row] = C[a_num_rows*b_col + a_row] + (a_val * b_val);
             
         }
-        
     }
+    
+    // free the offsets from memory now! we no longer need them
+    free(b_row_val_offsets);
     
 }
 
