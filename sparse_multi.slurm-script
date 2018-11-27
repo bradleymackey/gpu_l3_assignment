@@ -1,0 +1,15 @@
+#!/bin/csh
+#SBATCH --job-name="sparse-multi"
+#SBATCH -p par6.q
+#SBATCH -o sparse_multi.%A.out
+#SBATCH -e sparse_multi.%A.err
+#SBATCH -t 00:05:00
+#SBATCH --exclusive
+#SBATCH --mail-user=bradley.mackey@durham.ac.uk
+#SBATCH --mail-type=ALL
+
+source /etc/profile.d/modules.sh
+module purge
+module load likwid
+module load intel/xe_2015.2
+./optimised-sparsemm.o
