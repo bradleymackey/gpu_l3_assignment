@@ -61,10 +61,8 @@ static int *first_val_offsets(const COO B, int nzb, int rows_b) {
     
     for (int k = 0; k < nzb; k++) {
         
-        
         // the row number for this coordinate
         curr_row = B->coords[k].i;
-        
         
         // if we have not marked the start of this row already...
         if (curr_row != prev_row) {
@@ -77,9 +75,7 @@ static int *first_val_offsets(const COO B, int nzb, int rows_b) {
                 // update difference with how many mem cells we should backfill with -1s
                 difference -= 1;
                 for (int d = 1; d <= difference; d++) {
-
                     result[curr_row-d] = -1;
-
                 }
             }
             
@@ -110,18 +106,15 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
     const int nza = A->NZ;
     const int nzb = B->NZ;
     
-    // dimensions of the resultant `C` matrix.
-    const int m = A->m;
-    const int n = B->n;
-    
+    const int a_num_rows = A->m; // rows of a
     
     // offsets of row values in the b matrix
     // used to easily locate row values in B
     const int *b_row_val_offsets = first_val_offsets(B, nzb, B->m);
 
     // keep track of current values
-    int a_row, a_col, b_row, b_col;
-    double a_val, b_val;
+    register int a_row, a_col, b_row, b_col;
+    register double a_val, b_val;
     for (int k = 0; k < nza; k++) {
         
         a_col = A->coords[k].j;
@@ -158,7 +151,7 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
             
             // row = row of a
             // column = col of b
-            C[m*b_col + a_row] = C[m*b_col + a_row] + (a_val * b_val);
+            C[a_num_rows*b_col + a_row] = C[a_num_rows*b_col + a_row] + (a_val * b_val);
             
         }
         
