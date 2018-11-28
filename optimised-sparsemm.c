@@ -1,6 +1,6 @@
 #include "utils.h"
 #include <stdlib.h>
-#include <likwid.h>
+
 
 // use `likwid` on Hamilton in order to measure performance of the routines
 
