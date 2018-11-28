@@ -1,0 +1,15 @@
+#!/bin/csh
+#SBATCH --job-name="big-sparse"
+#SBATCH -p par7.q
+#SBATCH -o sparse_multi_big.%A.out
+#SBATCH -e sparse_multi_big.%A.err
+#SBATCH -t 03:30:00
+#SBATCH --exclusive
+#SBATCH --mail-user=bradley.mackey@durham.ac.uk
+#SBATCH --mail-type=ALL
+
+source /etc/profile.d/modules.sh
+module purge
+module load likwid
+module load intel/xe_2015.2
+./profile-multi-big.sh

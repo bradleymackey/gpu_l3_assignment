@@ -35,7 +35,6 @@ void basic_sparsemm(const COO A, const COO B, COO *C)
     
     LIKWID_MARKER_INIT;
     
-    
     // pointers to the elements of each matrix
     double *a = NULL;
     double *b = NULL;
@@ -70,7 +69,6 @@ void basic_sparsemm(const COO A, const COO B, COO *C)
     // allocate `c` and zero out the necessary memory in order to perform this multiplication
     alloc_dense(m, n, &c);
     zero_dense(m, n, c);
-
     
     LIKWID_MARKER_START("basic-multiplication");
     dgemm(m, n, k, a, b, c);
