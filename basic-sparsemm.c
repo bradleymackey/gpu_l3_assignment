@@ -72,9 +72,9 @@ void basic_sparsemm(const COO A, const COO B, COO *C)
     zero_dense(m, n, c);
 
     
-    LIKWID_MARKER_START("multi");
+    LIKWID_MARKER_START("basic-multiplication");
     dgemm(m, n, k, a, b, c);
-    LIKWID_MARKER_STOP("multi");
+    LIKWID_MARKER_STOP("basic-multiplication");
     free_dense(&a);
     free_dense(&b);
     convert_dense_to_sparse(c, m, n, C);
