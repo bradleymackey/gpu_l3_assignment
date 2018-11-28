@@ -60,7 +60,8 @@ static int *first_val_offsets(const COO B, int nzb, int rows_b) {
     curr_row = 0;
     prev_row = -1;
     
-    for (int k = 0; k < nzb; k++) {
+    int k;
+    for (k = 0; k < nzb; k++) {
         
         // the row number for this coordinate
         curr_row = B->coords[k].i;
@@ -75,7 +76,8 @@ static int *first_val_offsets(const COO B, int nzb, int rows_b) {
             if (difference>1 && prev_row != -1) {
                 // update difference with how many mem cells we should backfill with -1s
                 difference -= 1;
-                for (int d = 1; d <= difference; d++) {
+                int d;
+                for (d = 1; d <= difference; d++) {
                     result[curr_row-d] = -1;
                 }
             }
@@ -91,7 +93,8 @@ static int *first_val_offsets(const COO B, int nzb, int rows_b) {
     
     // fill any trailing memory cells that we did not reach
     // (because there are no cells in the matrix), with -1s
-    for (int i = curr_row+1; i < rows_b; i++) {
+    int i;
+    for (i = curr_row+1; i < rows_b; i++) {
         result[i] = -1;
     }
     
@@ -117,7 +120,8 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
     register double a_val, b_val;
     
     #pragma acc kernels
-    for (int k = 0; k < nza; k++) {
+    int k;
+    for (k = 0; k < nza; k++) {
         
         a_col = A->coords[k].j;
         
@@ -136,7 +140,8 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
         // we will perform up to `the number of rows of B` iterations - likley less unless a certain column of B is totally filled
         // iterate over all b column values while the row of b matches `a`'s column
         // (just ensures that we don't run past the row of b we are interested in or run over the end of the array)
-        for (int p = 0; p < B->m; p++) {
+        int p;
+        for (p = 0; p < B->m; p++) {
             
             b_row = B->coords[b_offset+p].i;
             
