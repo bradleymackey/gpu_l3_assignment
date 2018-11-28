@@ -3,7 +3,7 @@
 #SBATCH -p par7.q
 #SBATCH -o sparse_multi.%A.out
 #SBATCH -e sparse_multi.%A.err
-#SBATCH -t 00:30:00
+#SBATCH -t 03:30:00
 #SBATCH --exclusive
 #SBATCH --mail-user=bradley.mackey@durham.ac.uk
 #SBATCH --mail-type=ALL

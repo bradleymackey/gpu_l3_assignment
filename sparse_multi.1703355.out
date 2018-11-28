@@ -1,0 +1,549 @@
+testing small matricies
+resulta
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+CPU type:	Intel Xeon Broadwell EN/EP/EX processor
+CPU clock:	2.20 GHz
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Region multi, Group 1: FLOPS_DP
++-------------------+----------+
+|    Region Info    |  Core 1  |
++-------------------+----------+
+| RDTSC Runtime [s] | 0.000002 |
+|     call count    |     1    |
++-------------------+----------+
+
++------------------------------------------+---------+--------+
+|                   Event                  | Counter | Core 1 |
++------------------------------------------+---------+--------+
+|             INSTR_RETIRED_ANY            |  FIXC0  |  7067  |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  |  12997 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  |  23870 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |    0   |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |   70   |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |    0   |
++------------------------------------------+---------+--------+
+
++----------------------+--------------+
+|        Metric        |    Core 1    |
++----------------------+--------------+
+|  Runtime (RDTSC) [s] | 1.821819e-06 |
+| Runtime unhalted [s] | 5.907838e-06 |
+|      Clock [MHz]     |   1197.8578  |
+|          CPI         |    1.8391    |
+|        MFLOP/s       |    38.4231   |
+|      AVX MFLOP/s     |       0      |
+|    Packed MUOPS/s    |       0      |
+|    Scalar MUOPS/s    |    38.4231   |
++----------------------+--------------+
+
+resultb
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+CPU type:	Intel Xeon Broadwell EN/EP/EX processor
+CPU clock:	2.20 GHz
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Region multi, Group 1: FLOPS_DP
++-------------------+----------+
+|    Region Info    |  Core 1  |
++-------------------+----------+
+| RDTSC Runtime [s] | 0.000002 |
+|     call count    |     1    |
++-------------------+----------+
+
++------------------------------------------+---------+--------+
+|                   Event                  | Counter | Core 1 |
++------------------------------------------+---------+--------+
+|             INSTR_RETIRED_ANY            |  FIXC0  |  7067  |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  |  12596 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  |  23034 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |    0   |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |   70   |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |    0   |
++------------------------------------------+---------+--------+
+
++----------------------+--------------+
+|        Metric        |    Core 1    |
++----------------------+--------------+
+|  Runtime (RDTSC) [s] | 1.659594e-06 |
+| Runtime unhalted [s] | 5.725463e-06 |
+|      Clock [MHz]     |   1203.0547  |
+|          CPI         |    1.7824    |
+|        MFLOP/s       |    42.1790   |
+|      AVX MFLOP/s     |       0      |
+|    Packed MUOPS/s    |       0      |
+|    Scalar MUOPS/s    |    42.1790   |
++----------------------+--------------+
+
+testing small DG matrices
+resultc
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+CPU type:	Intel Xeon Broadwell EN/EP/EX processor
+CPU clock:	2.20 GHz
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Region multi, Group 1: FLOPS_DP
++-------------------+----------+
+|    Region Info    |  Core 1  |
++-------------------+----------+
+| RDTSC Runtime [s] | 2.708954 |
+|     call count    |     1    |
++-------------------+----------+
+
++------------------------------------------+---------+-------------+
+|                   Event                  | Counter |    Core 1   |
++------------------------------------------+---------+-------------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 16160780000 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  |  7158145000 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  |  5946880000 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |      0      |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |   6118018   |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |  2673567000 |
++------------------------------------------+---------+-------------+
+
++----------------------+-----------+
+|        Metric        |   Core 1  |
++----------------------+-----------+
+|  Runtime (RDTSC) [s] |   2.7090  |
+| Runtime unhalted [s] |   3.2542  |
+|      Clock [MHz]     | 2647.7311 |
+|          CPI         |   0.4429  |
+|        MFLOP/s       | 3950.0065 |
+|      AVX MFLOP/s     | 3947.7481 |
+|    Packed MUOPS/s    |  986.9370 |
+|    Scalar MUOPS/s    |   2.2584  |
++----------------------+-----------+
+
+resultd
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+CPU type:	Intel Xeon Broadwell EN/EP/EX processor
+CPU clock:	2.20 GHz
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Region multi, Group 1: FLOPS_DP
++-------------------+----------+
+|    Region Info    |  Core 1  |
++-------------------+----------+
+| RDTSC Runtime [s] | 2.724467 |
+|     call count    |     1    |
++-------------------+----------+
+
++------------------------------------------+---------+-------------+
+|                   Event                  | Counter |    Core 1   |
++------------------------------------------+---------+-------------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 16160780000 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  |  7201338000 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  |  5976472000 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |      0      |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |   6118018   |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |  2673567000 |
++------------------------------------------+---------+-------------+
+
++----------------------+-----------+
+|        Metric        |   Core 1  |
++----------------------+-----------+
+|  Runtime (RDTSC) [s] |   2.7245  |
+| Runtime unhalted [s] |   3.2738  |
+|      Clock [MHz]     | 2650.5144 |
+|          CPI         |   0.4456  |
+|        MFLOP/s       | 3927.5154 |
+|      AVX MFLOP/s     | 3925.2698 |
+|    Packed MUOPS/s    |  981.3174 |
+|    Scalar MUOPS/s    |   2.2456  |
++----------------------+-----------+
+
+resulte
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+CPU type:	Intel Xeon Broadwell EN/EP/EX processor
+CPU clock:	2.20 GHz
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Region multi, Group 1: FLOPS_DP
++-------------------+-----------+
+|    Region Info    |   Core 1  |
++-------------------+-----------+
+| RDTSC Runtime [s] | 31.458810 |
+|     call count    |     1     |
++-------------------+-----------+
+
++------------------------------------------+---------+--------------+
+|                   Event                  | Counter |    Core 1    |
++------------------------------------------+---------+--------------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 128906500000 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  |  87041570000 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  |  68930240000 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |       0      |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |   48944050   |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |  21388530000 |
++------------------------------------------+---------+--------------+
+
++----------------------+-----------+
+|        Metric        |   Core 1  |
++----------------------+-----------+
+|  Runtime (RDTSC) [s] |  31.4588  |
+| Runtime unhalted [s] |  39.5643  |
+|      Clock [MHz]     | 2778.0508 |
+|          CPI         |   0.6752  |
+|        MFLOP/s       | 2721.1158 |
+|      AVX MFLOP/s     | 2719.5600 |
+|    Packed MUOPS/s    |  679.8900 |
+|    Scalar MUOPS/s    |   1.5558  |
++----------------------+-----------+
+
+resultf
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+CPU type:	Intel Xeon Broadwell EN/EP/EX processor
+CPU clock:	2.20 GHz
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Region multi, Group 1: FLOPS_DP
++-------------------+-----------+
+|    Region Info    |   Core 1  |
++-------------------+-----------+
+| RDTSC Runtime [s] | 31.522620 |
+|     call count    |     1     |
++-------------------+-----------+
+
++------------------------------------------+---------+--------------+
+|                   Event                  | Counter |    Core 1    |
++------------------------------------------+---------+--------------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 128906500000 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  |  87157190000 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  |  69037510000 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |       0      |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |   48944050   |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |  21388530000 |
++------------------------------------------+---------+--------------+
+
++----------------------+-----------+
+|        Metric        |   Core 1  |
++----------------------+-----------+
+|  Runtime (RDTSC) [s] |  31.5226  |
+| Runtime unhalted [s] |  39.6169  |
+|      Clock [MHz]     | 2777.4121 |
+|          CPI         |   0.6761  |
+|        MFLOP/s       | 2715.6075 |
+|      AVX MFLOP/s     | 2714.0549 |
+|    Packed MUOPS/s    |  678.5137 |
+|    Scalar MUOPS/s    |   1.5527  |
++----------------------+-----------+
+
+resultg
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+CPU type:	Intel Xeon Broadwell EN/EP/EX processor
+CPU clock:	2.20 GHz
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Region multi, Group 1: FLOPS_DP
++-------------------+------------+
+|    Region Info    |   Core 1   |
++-------------------+------------+
+| RDTSC Runtime [s] | 149.688000 |
+|     call count    |      1     |
++-------------------+------------+
+
++------------------------------------------+---------+--------------+
+|                   Event                  | Counter |    Core 1    |
++------------------------------------------+---------+--------------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 595859800000 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  | 416493800000 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  | 328148400000 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |       0      |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |   135955700  |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |  99043650000 |
++------------------------------------------+---------+--------------+
+
++----------------------+-----------+
+|        Metric        |   Core 1  |
++----------------------+-----------+
+|  Runtime (RDTSC) [s] |  149.6880 |
+| Runtime unhalted [s] |  189.3203 |
+|      Clock [MHz]     | 2792.2199 |
+|          CPI         |   0.6990  |
+|        MFLOP/s       | 2647.5773 |
+|      AVX MFLOP/s     | 2646.6691 |
+|    Packed MUOPS/s    |  661.6673 |
+|    Scalar MUOPS/s    |   0.9083  |
++----------------------+-----------+
+
+resulth
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+CPU type:	Intel Xeon Broadwell EN/EP/EX processor
+CPU clock:	2.20 GHz
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Region multi, Group 1: FLOPS_DP
++-------------------+------------+
+|    Region Info    |   Core 1   |
++-------------------+------------+
+| RDTSC Runtime [s] | 149.664200 |
+|     call count    |      1     |
++-------------------+------------+
+
++------------------------------------------+---------+--------------+
+|                   Event                  | Counter |    Core 1    |
++------------------------------------------+---------+--------------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 595859800000 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  | 416562900000 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  | 328176600000 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |       0      |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |   135955700  |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |  99043650000 |
++------------------------------------------+---------+--------------+
+
++----------------------+-----------+
+|        Metric        |   Core 1  |
++----------------------+-----------+
+|  Runtime (RDTSC) [s] |  149.6642 |
+| Runtime unhalted [s] |  189.3732 |
+|      Clock [MHz]     | 2792.1260 |
+|          CPI         |   0.6991  |
+|        MFLOP/s       | 2647.9984 |
+|      AVX MFLOP/s     | 2647.0900 |
+|    Packed MUOPS/s    |  661.7725 |
+|    Scalar MUOPS/s    |   0.9084  |
++----------------------+-----------+
+
+resulti
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+CPU type:	Intel Xeon Broadwell EN/EP/EX processor
+CPU clock:	2.20 GHz
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Region multi, Group 1: FLOPS_DP
++-------------------+------------+
+|    Region Info    |   Core 1   |
++-------------------+------------+
+| RDTSC Runtime [s] | 521.484300 |
+|     call count    |      1     |
++-------------------+------------+
+
++------------------------------------------+---------+---------------+
+|                   Event                  | Counter |     Core 1    |
++------------------------------------------+---------+---------------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 2009076000000 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  | 1450314000000 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  | 1142744000000 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |       0       |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |   152950300   |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |  334348800000 |
++------------------------------------------+---------+---------------+
+
++----------------------+-----------+
+|        Metric        |   Core 1  |
++----------------------+-----------+
+|  Runtime (RDTSC) [s] |  521.4843 |
+| Runtime unhalted [s] |  659.2336 |
+|      Clock [MHz]     | 2792.1312 |
+|          CPI         |   0.7219  |
+|        MFLOP/s       | 2564.8867 |
+|      AVX MFLOP/s     | 2564.5934 |
+|    Packed MUOPS/s    |  641.1484 |
+|    Scalar MUOPS/s    |   0.2933  |
++----------------------+-----------+
+
+resultj
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+CPU type:	Intel Xeon Broadwell EN/EP/EX processor
+CPU clock:	2.20 GHz
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Region basic-multiplication, Group 1: FLOPS_DP
++-------------------+------------+
+|    Region Info    |   Core 1   |
++-------------------+------------+
+| RDTSC Runtime [s] | 519.402000 |
+|     call count    |      1     |
++-------------------+------------+
+
++------------------------------------------+---------+---------------+
+|                   Event                  | Counter |     Core 1    |
++------------------------------------------+---------+---------------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 2009076000000 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  | 1445482000000 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  | 1138960000000 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |       0       |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |   152950300   |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |  334348800000 |
++------------------------------------------+---------+---------------+
+
++----------------------+-----------+
+|        Metric        |   Core 1  |
++----------------------+-----------+
+|  Runtime (RDTSC) [s] |  519.4020 |
+| Runtime unhalted [s] |  657.0825 |
+|      Clock [MHz]     | 2791.8816 |
+|          CPI         |   0.7195  |
+|        MFLOP/s       | 2575.1694 |
+|      AVX MFLOP/s     | 2574.8750 |
+|    Packed MUOPS/s    |  643.7187 |
+|    Scalar MUOPS/s    |   0.2945  |
++----------------------+-----------+
+
+testing bigger 3D
+resultk
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+CPU type:	Intel Xeon Broadwell EN/EP/EX processor
+CPU clock:	2.20 GHz
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Region basic-multiplication, Group 1: FLOPS_DP
++-------------------+----------+
+|    Region Info    |  Core 1  |
++-------------------+----------+
+| RDTSC Runtime [s] | 3.670424 |
+|     call count    |     1    |
++-------------------+----------+
+
++------------------------------------------+---------+-------------+
+|                   Event                  | Counter |    Core 1   |
++------------------------------------------+---------+-------------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 19460490000 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  |  9881902000 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  |  8051298000 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |      0      |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |   6926658   |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |  3220889000 |
++------------------------------------------+---------+-------------+
+
++----------------------+-----------+
+|        Metric        |   Core 1  |
++----------------------+-----------+
+|  Runtime (RDTSC) [s] |   3.6704  |
+| Runtime unhalted [s] |   4.4924  |
+|      Clock [MHz]     | 2699.8027 |
+|          CPI         |   0.5078  |
+|        MFLOP/s       | 3511.9874 |
+|      AVX MFLOP/s     | 3510.1002 |
+|    Packed MUOPS/s    |  877.5250 |
+|    Scalar MUOPS/s    |   1.8872  |
++----------------------+-----------+
+
+resultl
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+CPU type:	Intel Xeon Broadwell EN/EP/EX processor
+CPU clock:	2.20 GHz
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Region basic-multiplication, Group 1: FLOPS_DP
++-------------------+----------+
+|    Region Info    |  Core 1  |
++-------------------+----------+
+| RDTSC Runtime [s] | 3.455786 |
+|     call count    |     1    |
++-------------------+----------+
+
++------------------------------------------+---------+-------------+
+|                   Event                  | Counter |    Core 1   |
++------------------------------------------+---------+-------------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 19460490000 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  |  9239725000 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  |  7580592000 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |      0      |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |   6926658   |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |  3220889000 |
++------------------------------------------+---------+-------------+
+
++----------------------+-----------+
+|        Metric        |   Core 1  |
++----------------------+-----------+
+|  Runtime (RDTSC) [s] |   3.4558  |
+| Runtime unhalted [s] |   4.1999  |
+|      Clock [MHz]     | 2681.4831 |
+|          CPI         |   0.4748  |
+|        MFLOP/s       | 3730.1160 |
+|      AVX MFLOP/s     | 3728.1116 |
+|    Packed MUOPS/s    |  932.0279 |
+|    Scalar MUOPS/s    |   2.0044  |
++----------------------+-----------+
+
+resultm
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+CPU type:	Intel Xeon Broadwell EN/EP/EX processor
+CPU clock:	2.20 GHz
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Region basic-multiplication, Group 1: FLOPS_DP
++-------------------+----------+
+|    Region Info    |  Core 1  |
++-------------------+----------+
+| RDTSC Runtime [s] | 3.605288 |
+|     call count    |     1    |
++-------------------+----------+
+
++------------------------------------------+---------+-------------+
+|                   Event                  | Counter |    Core 1   |
++------------------------------------------+---------+-------------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 19460490000 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  |  9621976000 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  |  7900141000 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |      0      |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |   6926658   |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |  3220889000 |
++------------------------------------------+---------+-------------+
+
++----------------------+-----------+
+|        Metric        |   Core 1  |
++----------------------+-----------+
+|  Runtime (RDTSC) [s] |   3.6053  |
+| Runtime unhalted [s] |   4.3739  |
+|      Clock [MHz]     | 2679.3214 |
+|          CPI         |   0.4944  |
+|        MFLOP/s       | 3575.4377 |
+|      AVX MFLOP/s     | 3573.5165 |
+|    Packed MUOPS/s    |  893.3791 |
+|    Scalar MUOPS/s    |   1.9212  |
++----------------------+-----------+
+
+resultn
+--------------------------------------------------------------------------------
+CPU name:	Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
+CPU type:	Intel Xeon Broadwell EN/EP/EX processor
+CPU clock:	2.20 GHz
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+Region basic-multiplication, Group 1: FLOPS_DP
++-------------------+----------+
+|    Region Info    |  Core 1  |
++-------------------+----------+
+| RDTSC Runtime [s] | 3.600619 |
+|     call count    |     1    |
++-------------------+----------+
+
++------------------------------------------+---------+-------------+
+|                   Event                  | Counter |    Core 1   |
++------------------------------------------+---------+-------------+
+|             INSTR_RETIRED_ANY            |  FIXC0  | 19460490000 |
+|           CPU_CLK_UNHALTED_CORE          |  FIXC1  |  9592859000 |
+|           CPU_CLK_UNHALTED_REF           |  FIXC2  |  7891070000 |
+| FP_ARITH_INST_RETIRED_128B_PACKED_DOUBLE |   PMC0  |      0      |
+|    FP_ARITH_INST_RETIRED_SCALAR_DOUBLE   |   PMC1  |   6926658   |
+| FP_ARITH_INST_RETIRED_256B_PACKED_DOUBLE |   PMC2  |  3220889000 |
++------------------------------------------+---------+-------------+
+
++----------------------+-----------+
+|        Metric        |   Core 1  |
++----------------------+-----------+
+|  Runtime (RDTSC) [s] |   3.6006  |
+| Runtime unhalted [s] |   4.3611  |
+|      Clock [MHz]     | 2673.9875 |
+|          CPI         |   0.4929  |
+|        MFLOP/s       | 3580.0741 |
+|      AVX MFLOP/s     | 3578.1503 |
+|    Packed MUOPS/s    |  894.5376 |
+|    Scalar MUOPS/s    |   1.9237  |
++----------------------+-----------+
+

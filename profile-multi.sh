@@ -1,12 +1,10 @@
 #!/bin/bash
 
-echo cleaning prior registers!
-likwid-perfctr -f
-echo clean complete
+# note that the first run uses -f to clean prior register that may have been in use
 
 echo testing small matricies
 echo resulta
-likwid-perfctr -g FLOPS_DP -C S0:1 -m ./sparsemm resulta.matrix ./matrix/small/testA.matrix ./matrix/small/testB.matrix
+likwid-perfctr -f -g FLOPS_DP -C S0:1 -m ./sparsemm resulta.matrix ./matrix/small/testA.matrix ./matrix/small/testB.matrix
 echo resultb
 likwid-perfctr -g FLOPS_DP -C S0:1 -m ./sparsemm resultb.matrix ./matrix/small/testB.matrix ./matrix/small/testA.matrix
 
