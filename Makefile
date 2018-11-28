@@ -1,4 +1,4 @@
-CFLAGS = -O3 -march=native  -D_GNU_SOURCE
+CFLAGS = -O3 -march=native  -D_GNU_SOURCE -DLIKWID_PERFMON -I/ddn/apps/Cluster-Apps/likwid/4.1/include -L/ddn/apps/Cluster-Apps/likwid/4.1/lib -llikwid
 LDFLAGS = -lm
 CC = gcc
 
