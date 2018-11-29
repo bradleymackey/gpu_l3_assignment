@@ -42,7 +42,9 @@ void basic_sparsemm_sum(const COO, const COO, const COO,
  * time complexity: O(n)
  * space complexity: O(n)
  */
-static int *row_offset_table(const COO B, int nzb, int rows_b) {
+static int *row_offset_table(const COO B) {
+    
+    int rows_b = B->m;
     
     // where we will store resultant array
     int *result = (int*)malloc(rows_b*sizeof(int));
@@ -54,7 +56,7 @@ static int *row_offset_table(const COO B, int nzb, int rows_b) {
     prev_row = -1;
     
     int k;
-    for (k = 0; k < nzb; k++) {
+    for (k = 0; k < B->NZ; k++) {
         
         // the row number for this coordinate
         curr_row = B->coords[k].i;
@@ -106,7 +108,7 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
     
     // offsets of row values in the b matrix
     // used to easily locate row values in B
-    int *b_row_val_offsets = row_offset_table(B, nzb, B->m);
+    int *b_row_val_offsets = row_offset_table(B);
 
     // keep track of current values
     register int a_row, a_col, b_row, b_col;
@@ -290,7 +292,10 @@ static void merge_matrices(COO A, COO B, int b_uniques) {
 /* add the matrices A and B, storing the result in A.
  * we require messing up entries of B (zeroing some out), so we dealloc B after because it is now useless
  */
-static void add_matrices(COO A, COO B, int *b_row_offset_table) {
+static void add_matrices(COO A, COO B) {
+    
+    // to quickly jump to rows in B
+    int *b_row_offset_table = row_offset_table(B);
     
     // go through each line of A
     int k, a_row, a_col, b_uniques;
@@ -309,6 +314,7 @@ static void add_matrices(COO A, COO B, int *b_row_offset_table) {
     
     // B is now useless
     // (it got messed up bad when we were locating matching add values)
+    free(b_row_offset_table);
     free(B->data);
     free(B->coords);
     free(B);
@@ -355,7 +361,34 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
         exit(1);
     }
     
+    // CREATE MASTER MATRIX A (what we will multiply)
+    add_matrices(A,B);
+    add_matrices(A,C);
+    
+    // CREATE MASTER MATRIX D (what we will multiply)
+    add_matrices(D,E);
+    add_matrices(D,F);
+    
+    // pointer to the O matrix that we will use to store the result
+    double *o = NULL;
+    // ensure there is no value currently stored at O
+    *O = NULL;
+    
+    // allocate dense, because it could well be the case that every element will be filled after the multiplication
+    alloc_dense(m, n, &o);
+    // zero it out, we don't know if this is guaranteed or not
+    zero_dense(m, n, o);
+    
+    // perform the optimised matrix multiplication operation
+    LIKWID_MARKER_START("optimised-multi-add");
+    perform_sparse_optimised_multi(A, D, o);
+    LIKWID_MARKER_STOP("optimised-multi-add");
+    // as we created C in a dense format, we want to convert the representation back out to the testing suite expects
+    convert_dense_to_sparse(c, m, n, O);
+    free_dense(&o);
+    
+    LIKWID_MARKER_CLOSE;
     
     
-    return basic_sparsemm_sum(A, B, C, D, E, F, O);
+//    return basic_sparsemm_sum(A, B, C, D, E, F, O);
 }
