@@ -13,13 +13,7 @@ void basic_sparsemm_sum(const COO, const COO, const COO,
 
 
 
-// compares 2 COOs, such that we can order by columns, for faster lookup
-//int compare_coo_order_cols(const void *v1, const void *v2) {
-//    COO coo1 = (COO)v1;
-//    COO coo2 = (COO)v2;
-//    int col_compare = coo1->coords->j - coo2->coords->i;
-//    return col_compare;
-//}
+
 //
 //
 ///*
@@ -49,7 +43,7 @@ void basic_sparsemm_sum(const COO, const COO, const COO,
  * time complexity: O(n)
  * space complexity: O(n)
  */
-static int *first_val_offsets(const COO B, int nzb, int rows_b) {
+static int *row_offset_table(const COO B, int nzb, int rows_b) {
     
     // where we will store resultant array
     int *result = (int*)malloc(rows_b*sizeof(int));
@@ -113,7 +107,7 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
     
     // offsets of row values in the b matrix
     // used to easily locate row values in B
-    int *b_row_val_offsets = first_val_offsets(B, nzb, B->m);
+    int *b_row_val_offsets = row_offset_table(B, nzb, B->m);
 
     // keep track of current values
     register int a_row, a_col, b_row, b_col;
@@ -160,7 +154,7 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
             // column = col of b
             // use a_num_rows because matrix cells are arranged in a column major format
             // (required for proper conversion back to sparse)
-            C[a_num_rows*b_col + a_row] = C[a_num_rows*b_col + a_row] + (a_val * b_val);
+            C[a_num_rows*b_col + a_row] += a_val * b_val;
             
         }
     }
@@ -178,41 +172,95 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
  */
 void optimised_sparsemm(const COO A, const COO B, COO *C) {
     
-    // idea - keep them all sparse, just try and do it, see how it goes!
+    // pointer to the C matrix that we will use to store the result
+    double *c = NULL;
+
+    // m = A rows
+    // n = B columns
+    // k = A columns
+    int m, n, k;
+
+    // ensure there is no value currently stored at C
+    *C = NULL;
+
+    // check that the matrices are compatible sizes
+    m = A->m;
+    k = A->n;
+    n = B->n;
+    if (k != B->m) {
+        fprintf(stderr, "Invalid matrix sizes, got %d x %d and %d x %d\n", A->m, A->n, B->m, B->n);
+        exit(1);
+    }
+
+    // allocate dense, because it could well be the case that every element will be filled after the multiplication
+    alloc_dense(m, n, &c);
+    // zero it out, we don't know if this is guaranteed or not
+    zero_dense(m, n, c);
+
+    // perform the optimised matrix multiplication operation
+    // we pass the
+    perform_sparse_optimised_multi(A, B, c);
+    // as we created C in a dense format, we want to convert the representation back out to the testing suite expects
+    convert_dense_to_sparse(c, m, n, C);
+    free_dense(&c);
     
-//    // pointer to the C matrix that we will use to store the result
-//    double *c = NULL;
-//
-//    // m = A rows
-//    // n = B columns
-//    // k = A columns
-//    int m, n, k;
-//
-//    // ensure there is no value currently stored at C
-//    *C = NULL;
-//
-//    // check that the matrices are compatible sizes
-//    m = A->m;
-//    k = A->n;
-//    n = B->n;
-//    if (k != B->m) {
-//        fprintf(stderr, "Invalid matrix sizes, got %d x %d and %d x %d\n", A->m, A->n, B->m, B->n);
-//        exit(1);
-//    }
-//
-//    // allocate dense, because it could well be the case that every element will be filled after the multiplication
-//    alloc_dense(m, n, &c);
-//    // zero it out, we don't know if this is guaranteed or not
-//    zero_dense(m, n, c);
-//
-//    // perform the optimised matrix multiplication operation
-//    // we pass the
-//    perform_sparse_optimised_multi(A, B, c);
-//    // as we created C in a dense format, we want to convert the representation back out to the testing suite expects
-//    convert_dense_to_sparse(c, m, n, C);
-//    free_dense(&c);
+    //return basic_sparsemm(A,B,C);
     
-    return basic_sparsemm(A,B,C);
+}
+
+// compares 2 COOs, such that we can order them for binary search
+static int compare_coo_order_cols(const void *v1, const void *v2) {
+    struct coord *c1 = (struct coord*)v1;
+    struct coord *c2 = (struct coord*)v2;
+    // deref the coord and compare the column values
+    return ( c1->j - c2->j );
+}
+
+
+// finds a matching entry in the other matrix from the lookup table and then by binary search, returning the value of this element.
+// returns 0 if unable to find, therefore no entry exists (no need to add this!)
+static double locate_matching_entry_to_add(COO M, int *row_offset_table, int row, int col) {
+    
+    // check that there is a matching row in this matrix
+    int row_offset = row_offset_table[row];
+    if (row_offset == -1) return 0.0f;
+    
+    register const int num_rows = M->m;
+    register int row_offset_end = -1;
+    register int k; // the last offset to check (so we know what range the row takes up)
+    for (k = row+1; k < num_rows; k++) {
+        row_offset_end = row_offset_table[k];
+        // if not -1 we have found an offset where we should step function
+        if (row_offset_end != -1) break;
+    }
+    
+    if (row_offset_end == -1) {
+        // we should go all the way to the end of the row coordinate list
+        // this is because this is the last row
+        row_offset_end = M->NZ; // -1 because zero indexed array
+    }
+    
+    // perform a binary search to find the matching column value
+    struct coord *col_ptr = (struct coord*)bsearch(&col, &(M->coords[row_offset]), row_offset_end-row_offset, sizeof(struct coord), compare_coo_order_cols);
+    if (col_ptr == NULL) return 0.0f;
+    
+    // find the offset so we can get at the data value now
+    int index = (col_ptr-(M->coords))/sizeof(struct coord);
+    return M->data[index]; // data at the same index coordinates are at, so this is the data value
+    
+}
+
+/* merge the matrices A and B
+ * A is used as the master - if there is a duplicate entry in each, A's value will be used
+ * (called from add_matrices)
+ */
+static void merge_matrices(COO A, COO B) {
+    
+}
+
+/* add the matrices A and B, storing the result in A.
+ */
+static void add_matrices(COO A, COO B) {
     
 }
 
@@ -223,6 +271,38 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
                             const COO D, const COO E, const COO F,
                             COO *O) {
     
+    // check that matrices are all compatible sizes
+    int i, j, m, n, k;
+    
+    m = A->m;
+    k = A->n;
+    n = D->n;
+    if (A->m != B->m || A->n != B->n) {
+        fprintf(stderr, "A (%d x %d) and B (%d x %d) are not the same shape\n",
+                A->m, A->n, B->m, B->n);
+        exit(1);
+    }
+    if (A->m != C->m || A->n != C->n) {
+        fprintf(stderr, "A (%d x %d) and C (%d x %d) are not the same shape\n",
+                A->m, A->n, C->m, C->n);
+        exit(1);
+    }
+    if (D->m != E->m || D->n != E->n) {
+        fprintf(stderr, "D (%d x %d) and E (%d x %d) are not the same shape\n",
+                D->m, D->n, E->m, E->n);
+        exit(1);
+    }
+    if (D->m != F->m || D->n != F->n) {
+        fprintf(stderr, "D (%d x %d) and F (%d x %d) are not the same shape\n",
+                D->m, D->n, F->m, F->n);
+        exit(1);
+    }
+    
+    if (A->n != D->m) {
+        fprintf(stderr, "Invalid matrix sizes, got %d x %d and %d x %d\n",
+                A->m, A->n, D->m, D->n);
+        exit(1);
+    }
     
     
     return basic_sparsemm_sum(A, B, C, D, E, F, O);
