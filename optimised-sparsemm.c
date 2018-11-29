@@ -223,7 +223,8 @@ static int compare_coo_order_cols(const void *v1, const void *v2) {
 
 // finds a matching entry in the other matrix from the lookup table and then by binary search, returning the value of this element.
 // returns 0 if unable to find, therefore no entry exists (no need to add this!)
-static double locate_matching_entry_to_add(COO M, int *row_offset_table, int row, int col) {
+// if zero_out is set, the value will be zeroed out after access
+static double locate_matching_entry(COO M, int *row_offset_table, int row, int col, int zero_out) {
     
     // check that there is a matching row in this matrix
     int row_offset = row_offset_table[row];
@@ -250,21 +251,67 @@ static double locate_matching_entry_to_add(COO M, int *row_offset_table, int row
     
     // find the offset so we can get at the data value now
     int index = (col_ptr-(M->coords))/sizeof(struct coord);
-    return M->data[index]; // data at the same index coordinates are at, so this is the data value
+    int result = M->data[index]; // data at the same index coordinates are at, so this is the data value
+    if (zero_out) M->data[index] = 0.0f;
+    return result;
     
 }
 
 /* merge the matrices A and B
- * A is used as the master - if there is a duplicate entry in each, A's value will be used
- * (called from add_matrices)
+ * merging is performed according to the following critereon:
+ * - result be A
+ * - entries from B we want to remove should have value zeroed out (otherwise duplicate row/cols will appear)
+ * - result will not be ordered
+ * (called from add matrices)
  */
-static void merge_matrices(COO A, COO B) {
+static void merge_matrices(COO A, COO B, int b_uniques) {
+    
+    // update A values to reflect the merge
+    int old_a_size = A->NZ;
+    A->NZ += b_uniques;
+    // realloc A so it's large enough to store b's unique entries as well
+    A->coords = (struct coord*)realloc(A->coords,A->NZ*sizeof(struct coord));
+    A->data = (double*)realloc(A->data,A->NZ*sizeof(double));
+    
+    // iterate over B and append all the entries to A
+    int k,j;
+    j = old_a_size;
+    for (k = 0; k < B->NZ; k++) {
+        // do not append if column is 0 - this value has already been added to A
+        if (B->data[k] != 0.0) {
+            A->data[j] = B->data[k];
+            A->coords[j] = B->coords[k];
+            j++; // increment A memory location
+        }
+    }
     
 }
 
 /* add the matrices A and B, storing the result in A.
+ * we require messing up entries of B (zeroing some out), so we dealloc B after because it is now useless
  */
-static void add_matrices(COO A, COO B) {
+static void add_matrices(COO A, COO B, int *b_row_offset_table) {
+    
+    // go through each line of A
+    int k, a_row, a_col, b_uniques;
+    b_uniques = 0;
+    double b_val;
+    for (k = 0; k < A->NZ; k++) {
+        a_row = A->coords[k].i;
+        a_col = A->coords[k].j;
+        // find matching entry in B, then add to A.
+        b_val = locate_matching_entry(B,b_row_offset_table,a_row,a_col,1);
+        if (b_val != 0.0) b_uniques++;
+        A->data[k] += b_val;
+    }
+    
+    merge_matrices(A, B, b_uniques);
+    
+    // B is now useless
+    // (it got messed up bad when we were locating matching add values)
+    free(B->data);
+    free(B->coords);
+    free(B);
     
 }
 
@@ -307,6 +354,7 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
                 A->m, A->n, D->m, D->n);
         exit(1);
     }
+    
     
     
     return basic_sparsemm_sum(A, B, C, D, E, F, O);
