@@ -53,11 +53,11 @@ static void order_coo_matrix(COO M) {
     double td;
     int k, j;
     for(i = 0; i < M->NZ; i++){
-        if(i != pointer_arr[i]-&(M->coords)){
+        if(i != pointer_arr[i]-(M->coords)){
             tc = M->coords[i];
             td = M->data[i];
             k = i;
-            while(i != (j = pointer_arr[k]-&(M->coords))){
+            while(i != (j = pointer_arr[k]-(M->coords))){
                 M->coords[k] = M->coords[j];
                 M->data[k] = M->data[j];
                 pointer_arr[k] = &(M->coords[k]);
