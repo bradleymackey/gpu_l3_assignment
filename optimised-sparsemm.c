@@ -13,6 +13,64 @@ void basic_sparsemm_sum(const COO, const COO, const COO,
                         const COO, const COO, const COO,
                         COO *);
 
+
+
+static int order_coo(const void *v1, const void *v2) {
+    struct coord *c1 = *(struct coord**)v1;
+    struct coord *c2 = *(struct coord**)v2;
+    int row_comp = c1->i - c2->i;
+    if (row_comp != 0) return row_comp;
+    // if rows are the same, order by column
+    return ( c1->j - c2->j );
+}
+
+// compares 2 COOs, such that we can order them for binary search
+static int compare_coo_order_cols(const void *v1, const void *v2) {
+    struct coord *c1 = (struct coord*)v1;
+    struct coord *c2 = (struct coord*)v2;
+    // deref the coord and compare the column values
+    return ( c1->j - c2->j );
+}
+
+/* sorts elements in a COO such that we are ordered by row, then sub-ordered by column
+ * pointer array sorted so we can order both the coordinate and data the same way
+ * technique thanks to: https://stackoverflow.com/a/32954558/3261161
+ */
+static void order_coo_matrix(COO M) {
+    
+    int **pointer_arr = (int*)malloc(M->NZ*sizeof(int));
+    
+    /* create array of pointers to coords[] */
+    int i;
+    for(i = 0; i < M->NZ; i++)
+        pointer_arr[i] = &(M->coords[i]);
+    
+    /* sort array of pointers */
+    qsort(pa, M->NZ, sizeof(int), order_coo);
+    
+    /* reorder coords[] and data[] according to the array of pointers */
+    struct coord tc;
+    double td;
+    int k, j;
+    for(i = 0; i < M->NZ; i++){
+        if(i != pointer_arr[i]-(M->coords)){
+            tc = M->coords[i];
+            td = M->data[i];
+            k = i;
+            while(i != (j = pointer_arr[k]-(M->coords))){
+                M->coords[k] = M->coords[j];
+                M->data[k] = M->data[j];
+                pointer_arr[k] = &(M->coords[k]);
+                k = j;
+            }
+            M->coords[k] = tc;
+            M->data[k] = td;
+            pointer_arr[k] = &(M->coords[k]);
+        }
+    }
+
+}
+
 //
 //
 ///*
@@ -199,6 +257,9 @@ void optimised_sparsemm(const COO A, const COO B, COO *C) {
     alloc_dense(m, n, &c);
     // zero it out, we don't know if this is guaranteed or not
     zero_dense(m, n, c);
+    
+    order_coo_matrix(A);
+    order_coo_matrix(B);
 
     // perform the optimised matrix multiplication operation
     LIKWID_MARKER_START("optimised-multi");
