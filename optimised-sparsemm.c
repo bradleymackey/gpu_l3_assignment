@@ -38,7 +38,7 @@ static int compare_coo_order_cols(const void *v1, const void *v2) {
  */
 static void order_coo_matrix(COO M) {
     
-    int **pointer_arr = (int**)malloc(M->NZ*sizeof(int));
+    struct coord **pointer_arr = (struct coord**)malloc(M->NZ*sizeof(int));
     
     /* create array of pointers to coords[] */
     int i;
