@@ -259,8 +259,10 @@ void optimised_sparsemm(const COO A, const COO B, COO *C) {
     zero_dense(m, n, c);
     
     // ensure the matrix entries are ordered in the way we expect!
+    LIKWID_MARKER_START("pre-process-multi");
     order_coo_matrix(A);
     order_coo_matrix(B);
+    LIKWID_MARKER_STOP("pre-process-multi");
 
     // perform the optimised matrix multiplication operation
     LIKWID_MARKER_START("optimised-multi");
@@ -390,6 +392,8 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
                             const COO D, const COO E, const COO F,
                             COO *O) {
     
+    LIKWID_MARKER_INIT;
+    
     // check that matrices are all compatible sizes
     int i, j, m, n, k;
     
@@ -423,6 +427,8 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
         exit(1);
     }
     
+    
+    LIKWID_MARKER_START("optimised-sum-add");
     // CREATE MASTER MATRIX A (what we will multiply)
     order_coo_matrix(B);
     add_matrices(A,B);
@@ -436,6 +442,7 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
     order_coo_matrix(F);
     add_matrices(D,F);
     order_coo_matrix(D);
+    LIKWID_MARKER_STOP("optimised-sum-multi");
     
     // pointer to the O matrix that we will use to store the result
     double *o = NULL;
@@ -448,9 +455,9 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
     zero_dense(m, n, o);
     
     // perform the optimised matrix multiplication operation
-    LIKWID_MARKER_START("optimised-multi-add");
+    LIKWID_MARKER_START("optimised-sum-multi");
     perform_sparse_optimised_multi(A, D, o);
-    LIKWID_MARKER_STOP("optimised-multi-add");
+    LIKWID_MARKER_STOP("optimised-sum-multi");
     // as we created C in a dense format, we want to convert the representation back out to the testing suite expects
     convert_dense_to_sparse(o, m, n, O);
     free_dense(&o);
