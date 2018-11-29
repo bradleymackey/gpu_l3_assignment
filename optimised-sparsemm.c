@@ -38,7 +38,7 @@ static int compare_coo_order_cols(const void *v1, const void *v2) {
  */
 static void order_coo_matrix(COO M) {
     
-    int **pointer_arr = (int*)malloc(M->NZ*sizeof(int));
+    int **pointer_arr = (int**)malloc(M->NZ*sizeof(int));
     
     /* create array of pointers to coords[] */
     int i;
@@ -46,18 +46,18 @@ static void order_coo_matrix(COO M) {
         pointer_arr[i] = &(M->coords[i]);
     
     /* sort array of pointers */
-    qsort(pa, M->NZ, sizeof(int), order_coo);
+    qsort(pointer_arr, M->NZ, sizeof(int), order_coo);
     
     /* reorder coords[] and data[] according to the array of pointers */
     struct coord tc;
     double td;
     int k, j;
     for(i = 0; i < M->NZ; i++){
-        if(i != pointer_arr[i]-(M->coords)){
+        if(i != pointer_arr[i]-&(M->coords)){
             tc = M->coords[i];
             td = M->data[i];
             k = i;
-            while(i != (j = pointer_arr[k]-(M->coords))){
+            while(i != (j = pointer_arr[k]-&(M->coords))){
                 M->coords[k] = M->coords[j];
                 M->data[k] = M->data[j];
                 pointer_arr[k] = &(M->coords[k]);
@@ -275,15 +275,6 @@ void optimised_sparsemm(const COO A, const COO B, COO *C) {
     
 }
 
-// compares 2 COOs, such that we can order them for binary search
-static int compare_coo_order_cols(const void *v1, const void *v2) {
-    struct coord *c1 = (struct coord*)v1;
-    struct coord *c2 = (struct coord*)v2;
-    // deref the coord and compare the column values
-    return ( c1->j - c2->j );
-}
-
-
 // finds a matching entry in the other matrix from the lookup table and then by binary search, returning the value of this element.
 // returns 0 if unable to find, therefore no entry exists (no need to add this!)
 // if zero_out is set, the value will be zeroed out after access
@@ -454,7 +445,7 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
     perform_sparse_optimised_multi(A, D, o);
     LIKWID_MARKER_STOP("optimised-multi-add");
     // as we created C in a dense format, we want to convert the representation back out to the testing suite expects
-    convert_dense_to_sparse(c, m, n, O);
+    convert_dense_to_sparse(o, m, n, O);
     free_dense(&o);
     
     LIKWID_MARKER_CLOSE;
