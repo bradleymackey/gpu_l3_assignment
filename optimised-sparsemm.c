@@ -46,7 +46,7 @@ static void order_coo_matrix(COO M) {
         pointer_arr[i] = &(M->coords[i]);
     
     /* sort array of pointers */
-    qsort(pointer_arr, M->NZ, sizeof(int), order_coo);
+    qsort(pointer_arr, M->NZ, sizeof(struct coord *), order_coo);
     
     /* reorder coords[] and data[] according to the array of pointers */
     struct coord tc;
