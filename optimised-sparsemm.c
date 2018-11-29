@@ -1,6 +1,8 @@
 #include "utils.h"
 #include <stdlib.h>
 
+#include <likwid.h>
+
 
 // use `likwid` on Hamilton in order to measure performance of the routines
 
@@ -10,9 +12,6 @@ void basic_sparsemm(const COO, const COO, COO *);
 void basic_sparsemm_sum(const COO, const COO, const COO,
                         const COO, const COO, const COO,
                         COO *);
-
-
-
 
 //
 //
@@ -172,6 +171,8 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
  */
 void optimised_sparsemm(const COO A, const COO B, COO *C) {
     
+    LIKWID_MARKER_INIT;
+    
     // pointer to the C matrix that we will use to store the result
     double *c = NULL;
 
@@ -198,11 +199,14 @@ void optimised_sparsemm(const COO A, const COO B, COO *C) {
     zero_dense(m, n, c);
 
     // perform the optimised matrix multiplication operation
-    // we pass the
+    LIKWID_MARKER_START("optimised-multi");
     perform_sparse_optimised_multi(A, B, c);
+    LIKWID_MARKER_STOP("optimised-multi");
     // as we created C in a dense format, we want to convert the representation back out to the testing suite expects
     convert_dense_to_sparse(c, m, n, C);
     free_dense(&c);
+    
+    LIKWID_MARKER_CLOSE;
     
     //return basic_sparsemm(A,B,C);
     
