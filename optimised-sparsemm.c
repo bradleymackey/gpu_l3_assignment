@@ -294,6 +294,15 @@ static void merge_matrices(COO A, COO B, int b_uniques) {
  */
 static void add_matrices(COO A, COO B) {
     
+    // the one with more non-zero values should be A
+    // this reduces the amount of binary searching and reallocing we have to do
+    // (since this is only an add operation, order does not matter)
+    if (B->NZ > A->NZ) {
+        COO tmp = A;
+        A = B;
+        B = tmp;
+    }
+    
     // to quickly jump to rows in B
     int *b_row_offset_table = row_offset_table(B);
     
