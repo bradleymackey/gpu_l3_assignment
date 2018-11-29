@@ -258,6 +258,7 @@ void optimised_sparsemm(const COO A, const COO B, COO *C) {
     // zero it out, we don't know if this is guaranteed or not
     zero_dense(m, n, c);
     
+    // ensure the matrix entries are ordered in the way we expect!
     order_coo_matrix(A);
     order_coo_matrix(B);
 
@@ -423,12 +424,18 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
     }
     
     // CREATE MASTER MATRIX A (what we will multiply)
+    order_coo_matrix(B);
     add_matrices(A,B);
+    order_coo_matrix(C);
     add_matrices(A,C);
+    order_coo_matrix(A);
     
     // CREATE MASTER MATRIX D (what we will multiply)
+    order_coo_matrix(E);
     add_matrices(D,E);
+    order_coo_matrix(F);
     add_matrices(D,F);
+    order_coo_matrix(D);
     
     // pointer to the O matrix that we will use to store the result
     double *o = NULL;
