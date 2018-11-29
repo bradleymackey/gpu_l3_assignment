@@ -1,14 +1,15 @@
 #!/bin/csh
 #SBATCH --job-name="sparse-multi"
 #SBATCH -p par7.q
-#SBATCH -o sparse_multi.%A.out
-#SBATCH -e sparse_multi.%A.err
-#SBATCH -t 03:30:00
+#SBATCH -o sparse_multi_opt.%A.out
+#SBATCH -e sparse_multi_opt.%A.err
+#SBATCH -t 00:10:00
 #SBATCH --exclusive
 #SBATCH --mail-user=bradley.mackey@durham.ac.uk
 #SBATCH --mail-type=ALL
 
 source /etc/profile.d/modules.sh
+# source /ddn/apps/Cluster-Apps/
 module purge
 module load likwid
 module load intel/xe_2015.2
