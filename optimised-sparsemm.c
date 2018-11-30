@@ -1,8 +1,9 @@
 #include "utils.h"
 #include <stdlib.h>
 #include <stddef.h>
+#include <string.h>
 
-#define SHOULD_PROFILE 1
+#define SHOULD_PROFILE 0
 
 #if SHOULD_PROFILE
 #include <likwid.h>
@@ -569,7 +570,6 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
     order_coo_matrix(F);
     add_matrices(D,F);
     order_coo_matrix(D);
-
     
     // ensure there is no value currently stored at O
     *O = NULL;

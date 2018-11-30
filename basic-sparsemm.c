@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <math.h>
 
-#define SHOULD_PROFILE_BASIC 1
+#define SHOULD_PROFILE_BASIC 0
 
 #if SHOULD_PROFILE_BASIC
 #include <likwid.h>
