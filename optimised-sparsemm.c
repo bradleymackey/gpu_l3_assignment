@@ -86,6 +86,43 @@ static void order_coo_matrix(COO M) {
 
 }
 
+// finds a matching entry in the other matrix from the lookup table and then by binary search, returning the value of this element.
+// returns 0 if unable to find, therefore no entry exists (no need to add this!)
+// if zero_out is set, the value will be zeroed out after access
+static double locate_matching_entry(COO M, int *row_offset_table, int row, int col, int zero_out) {
+    
+    // check that there is a matching row in this matrix
+    int row_offset = row_offset_table[row];
+    if (row_offset == -1) return 0.0f;
+    
+    register const int num_rows = M->m;
+    register int row_offset_end = -1;
+    register int k; // the last offset to check (so we know what range the row takes up)
+    #pragma acc kernels // ---> we need a way to break out once one thread has found it, or this may be slow
+    for (k = row+1; k < num_rows; k++) {
+        row_offset_end = row_offset_table[k];
+        // if not -1 we have found an offset where we should step function
+        if (row_offset_end != -1) break;
+    }
+    
+    if (row_offset_end == -1) {
+        // we should go all the way to the end of the row coordinate list
+        // this is because this is the last row
+        row_offset_end = M->NZ; // -1 because zero indexed array
+    }
+    
+    // perform a binary search to find the matching column value
+    struct coord *col_ptr = (struct coord*)bsearch(&col, &(M->coords[row_offset]), row_offset_end-row_offset, sizeof(struct coord), compare_coo_order_cols);
+    if (col_ptr == NULL) return 0.0f;
+    
+    // find the offset so we can get at the data value now
+    int index = (col_ptr-(M->coords))/sizeof(struct coord);
+    int result = M->data[index]; // data at the same index coordinates are at, so this is the data value
+    if (zero_out) M->data[index] = 0.0f;
+    return result;
+    
+}
+
 /*
  * preprocessing to allow for fast lookup of B elements by index
  * returns an array of the offsets of the elements in B, by row.
@@ -157,53 +194,114 @@ static int *row_offset_table(const COO B) {
     
 }
 
+/* reallocates memory for the sparse matrix (for use of the result matrix) */
+static void realloc_sparse(int NZ, COO C) {
+    C->coords = (struct coord*)realloc(NZ, sizeof(struct coord));
+    C->data = (double *)realloc(NZ, sizeof(double));
+}
 
-/* performs the sparse matrix multiplication
- */
-static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) {
-    
-    // the number of non-zero elements in A and B
+
+
+/* merges multiple partial row COOs into 1 single COO */
+// m is the number of rows result will have n is the number of columns result will have 
+static void merge_result_rows(int m, int n, COO *coo_list, COO result) {
+
+    /* result is just the first entry (we will append other items to this) */
+    result = coo_list[0];
+
+    /* allocate all the memory that we will need (so we pay less of a performance cost later - we don't want to realloc lots of times) */
+    int total_items = 0;
+    int k;
+    for (k=0; ; k++) {
+        COO coo = coo_list[i];
+        if (coo == NULL)
+            break;
+        total_items += coo->NZ;
+    }
+    /* allocate everything to be the final sizes that we will need */
+    result->coords = (struct coord*)realloc(result->coords,total_items*sizeof(struct coord));
+    result->data = (double *)realloc(result->data,total_items*sizeof(double));
+    result->NZ = total_items;
+    result->m = m;
+    result->n = n;
+
+    struct coord *coord_ptr;
+    double *data_ptr;
+    int i, new_size;
+    int current_mem_offset = 0;
+    /* this needs to be executed serially */
+    for (i = 1; ; i++) {
+        COO coo = coo_list[i];
+        if (coo == NULL) // end of loop
+            break;
+        /* reallocate enough memory to fit the combined list */
+        current_mem_offset += coo->NZ;
+        
+        /* copy coordinates and data into the result to combine them */
+        coord_ptr = (result->coords)+current_mem_offset;
+        memcpy(coord_ptr,coo->coords,coo->NZ*sizeof(struct coord));
+        data_ptr = (result->data)+current_mem_offset;
+        memcpy(data_ptr,coo->data,coo->NZ*sizeof(double));
+
+        /* free the old, unneeded old list (it is now in `result` so we need it no longer) */
+        free(coo->coords);
+        free(coo->data);
+        free(coo_list[i]);
+        
+    }
+
+}
+
+
+
+/* calculates a result row in the resultant matrix 
+   - row will allocated by this routine */
+static void calculate_result_row(int a_col, COO A, int *a_row_offsets, COO B, int *b_row_offsets, COO row) {
+
+    const int num_rows_a = A->m;
     const int nza = A->NZ;
     const int nzb = B->NZ;
+
+    int b_offset = b_row_val_offsets[a_col];
+    if (b_offset == -1) {
+        // if there is no offset for this row of `b`,
+        // there is no row of `b` for this column of `a` to multiply with,
+        // so this `a` value is of no use,
+        // so skip
+        // there will be nothing in this row result and *row will remain NULL
+        return;
+    }
     
-    const int a_num_rows = A->m; // rows of A
-    
+    // bear in mind this only represents a single row of the resultant matrix
+    // therefore the `m` and `n` for the size will not be accurate
+    alloc_sparse(B->m,A->n,num_rows_a,&row);
 
 
+    int non_zero_elements = 0;
 
-    
-    // offsets of row values in the b matrix
-    // used to easily locate row values in B
-    int *b_row_val_offsets = row_offset_table(B);
+    /* iterate over elements of A in the specified column */
+    double a_val, b_val;
+    int b_row, b_col;
+    int a_row;
+    for (a_row = 0; a_row < num_rows_a; a_row++) {
 
-    // keep track of current values
-    register int a_row, a_col, b_row, b_col;
-    register double a_val, b_val;
-    
-    int k;
-    #pragma acc kernels
-    for (k = 0; k < nza; k++) {
-        
-        a_col = A->coords[k].j;
-        
-        int b_offset = b_row_val_offsets[a_col];
-        if (b_offset == -1) {
-            // if there is no offset for this row of `b`,
-            // there is no row of `b` for this column of `a` to multiply with,
-            // so this `a` value is of no use,
-            // so skip
+        if (a_row_offsets[a_row] == NULL) {
+            // this row does not exist in A, so skip this iteration
             continue;
         }
-        
-        a_row = A->coords[k].i;
-        a_val = A->data[k];
-        
-        // we will perform up to `the number of rows of B` iterations - likley less unless a certain column of B is totally filled
+
+        // find the specific row/column value for A by binary search
+        a_val = locate_matching_entry(A,a_row_offsets,a_row,a_col,0);
+        if (a_val == 0.0) {
+            // there is no value, we cannot use this A
+            continue;
+        }
+
+        // we will perform up to `the number of columns of B` iterations - likley less unless a certain row of B is totally filled
         // iterate over all b column values while the row of b matches `a`'s column
         // (just ensures that we don't run past the row of b we are interested in or run over the end of the array)
         int p;
-        #pragma acc kernels
-        for (p = 0; p < B->m; p++) {
+        for (p = 0; p < B->n; p++) {
             
             b_row = B->coords[b_offset+p].i;
             
@@ -215,21 +313,70 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
             }
             
             // once we know to continue, get column val of `b` and the value we will use to multiply
-            b_col = B->coords[b_offset+p].j;
             b_val = B->data[b_offset+p];
             
             // row = row of a
             // column = col of b
             // use a_num_rows because matrix cells are arranged in a column major format
             // (required for proper conversion back to sparse)
-            C[a_num_rows*b_col + a_row] += a_val * b_val;
+            row->coords[a_row].i = a_col;
+            row->coords[a_row].j = b_row;
+            row->data[a_row] += a_val * b_val;
+            non_zero_elements++;
             
         }
+
     }
-    
-    // free the offsets from memory now we no longer need them!
-    free(b_row_val_offsets);
-    
+
+    /* arrange all elements so they maintain their order but are compressed to the top of the row */
+    /* this allows us to free all the empty space taken up by the 0 cells */
+    int elem = 0; 
+    int itr;
+    for (itr = 0; itr < num_rows_a; itr++) {
+        if (row->data[itr] != 0.0) {
+            row->coords[elem] = row->coords[itr];
+            row->data[elem] = row->data[itr];
+            elem++;
+        }
+    }
+
+    /* strip the row down to keep only the memory we need (hopefully much smaller than before if very sparse!) */
+    /* this works because all of the values we need have now been pushed to the top of the array, essentially 'squeezing out' the 0s */
+    row->NZ = non_zero_elements;
+    row->coords = (struct coord*)realloc(row->coords,non_zero_elements*sizeof(struct coord));
+    row->data = (double*)realloc(row->data,non_zero_elements*sizeof(double));
+
+}
+
+
+/* performs the sparse matrix multiplication
+ */
+static void perform_sparse_optimised_multi(const COO A, const COO B, COO C) {
+
+    const int a_num_cols = A->n;
+
+    /* offsets to easily locate row indices */
+    int *a_row_offsets = row_offset_table(A);
+    int *b_row_offsets = row_offset_table(B);
+
+    int merge_allocs_performed = 1;
+    COO *to_merge = (COO *)malloc((a_num_cols+1)*sizeof(COO *)); // add 1 for the null terminator
+
+    COO row;
+    int c;
+    for (c = 0; c < a_num_cols; c++) {
+        calculate_result_row(c,A,a_row_offsets,B,b_row_offsets,row);
+        to_merge[c] = row;
+    }
+
+    /* merge the row results, to get the final matrix C! */
+    to_merge[c+1] = NULL; // null terminate the list
+    merge_result_rows(A->n,B->m,to_merge,C);
+
+    /* we no longer need the offset tables */
+    free(a_row_offsets);
+    free(b_row_offsets);
+    free(to_merge);
 }
 
 
@@ -241,9 +388,6 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
 void optimised_sparsemm(const COO A, const COO B, COO *C) {
     
     LIKWID_MARKER_INIT;
-    
-    // pointer to the C matrix that we will use to store the result
-    double *c = NULL;
 
     // m = A rows
     // n = B columns
@@ -261,11 +405,6 @@ void optimised_sparsemm(const COO A, const COO B, COO *C) {
         fprintf(stderr, "Invalid matrix sizes, got %d x %d and %d x %d\n", A->m, A->n, B->m, B->n);
         exit(1);
     }
-
-    // allocate dense, because it could well be the case that every element will be filled after the multiplication
-    alloc_dense(m, n, &c);
-    // zero it out, we don't know if this is guaranteed or not
-    zero_dense(m, n, c);
     
     // ensure the matrix entries are ordered in the way we expect!
     LIKWID_MARKER_START("pre-process-multi");
@@ -275,11 +414,8 @@ void optimised_sparsemm(const COO A, const COO B, COO *C) {
 
     // perform the optimised matrix multiplication operation
     LIKWID_MARKER_START("optimised-multi");
-    perform_sparse_optimised_multi(A, B, c);
+    perform_sparse_optimised_multi(A, B, *C);
     LIKWID_MARKER_STOP("optimised-multi");
-    // as we created C in a dense format, we want to convert the representation back out to the testing suite expects
-    convert_dense_to_sparse(c, m, n, C);
-    free_dense(&c);
     
     LIKWID_MARKER_CLOSE;
     
@@ -287,42 +423,7 @@ void optimised_sparsemm(const COO A, const COO B, COO *C) {
     
 }
 
-// finds a matching entry in the other matrix from the lookup table and then by binary search, returning the value of this element.
-// returns 0 if unable to find, therefore no entry exists (no need to add this!)
-// if zero_out is set, the value will be zeroed out after access
-static double locate_matching_entry(COO M, int *row_offset_table, int row, int col, int zero_out) {
-    
-    // check that there is a matching row in this matrix
-    int row_offset = row_offset_table[row];
-    if (row_offset == -1) return 0.0f;
-    
-    register const int num_rows = M->m;
-    register int row_offset_end = -1;
-    register int k; // the last offset to check (so we know what range the row takes up)
-    #pragma acc kernels // ---> we need a way to break out once one thread has found it, or this may be slow
-    for (k = row+1; k < num_rows; k++) {
-        row_offset_end = row_offset_table[k];
-        // if not -1 we have found an offset where we should step function
-        if (row_offset_end != -1) break;
-    }
-    
-    if (row_offset_end == -1) {
-        // we should go all the way to the end of the row coordinate list
-        // this is because this is the last row
-        row_offset_end = M->NZ; // -1 because zero indexed array
-    }
-    
-    // perform a binary search to find the matching column value
-    struct coord *col_ptr = (struct coord*)bsearch(&col, &(M->coords[row_offset]), row_offset_end-row_offset, sizeof(struct coord), compare_coo_order_cols);
-    if (col_ptr == NULL) return 0.0f;
-    
-    // find the offset so we can get at the data value now
-    int index = (col_ptr-(M->coords))/sizeof(struct coord);
-    int result = M->data[index]; // data at the same index coordinates are at, so this is the data value
-    if (zero_out) M->data[index] = 0.0f;
-    return result;
-    
-}
+
 
 /* merge the matrices A and B
  * merging is performed according to the following critereon:
@@ -463,23 +564,13 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
 
     LIKWID_MARKER_STOP("optimised-sum-multi");
     
-    // pointer to the O matrix that we will use to store the result
-    double *o = NULL;
     // ensure there is no value currently stored at O
     *O = NULL;
     
-    // allocate dense, because it could well be the case that every element will be filled after the multiplication
-    alloc_dense(m, n, &o);
-    // zero it out, we don't know if this is guaranteed or not
-    zero_dense(m, n, o);
-    
     // perform the optimised matrix multiplication operation
     LIKWID_MARKER_START("optimised-sum-multi");
-    perform_sparse_optimised_multi(A, D, o);
+    perform_sparse_optimised_multi(A, D, *O);
     LIKWID_MARKER_STOP("optimised-sum-multi");
-    // as we created C in a dense format, we want to convert the representation back out to the testing suite expects
-    convert_dense_to_sparse(o, m, n, O);
-    free_dense(&o);
     
     LIKWID_MARKER_CLOSE;
     
