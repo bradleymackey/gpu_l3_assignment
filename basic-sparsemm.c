@@ -1,7 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+
+#define SHOULD_PROFILE_BASIC 1
+
+#if SHOULD_PROFILE_BASIC
 #include <likwid.h>
+#endif
 
 
 #include "utils.h"
@@ -33,7 +38,9 @@ static void dgemm(int m, int n, int k, const double *a, const double *b, double 
 void basic_sparsemm(const COO A, const COO B, COO *C)
 {
     
+    #if SHOULD_PROFILE_BASIC
     LIKWID_MARKER_INIT;
+    #endif
     
     // pointers to the elements of each matrix
     double *a = NULL;
@@ -44,6 +51,10 @@ void basic_sparsemm(const COO A, const COO B, COO *C)
     // n = B columns
     // k = A columns
     int m, n, k;
+
+    #if SHOULD_PROFILE_BASIC
+    LIKWID_MARKER_START("basic-mult-pre");
+    #endif
     
     // make them dense, allowing  for the simple dense algorithm
     // `a` and `b` will be modified by having their value set to the address of the first double in the array
@@ -70,15 +81,22 @@ void basic_sparsemm(const COO A, const COO B, COO *C)
     alloc_dense(m, n, &c);
     zero_dense(m, n, c);
     
+    #if SHOULD_PROFILE_BASIC
+    LIKWID_MARKER_STOP("basic-mult-pre");
     LIKWID_MARKER_START("basic-multiplication");
+    #endif
     dgemm(m, n, k, a, b, c);
+    #if SHOULD_PROFILE_BASIC
     LIKWID_MARKER_STOP("basic-multiplication");
+    #endif
     free_dense(&a);
     free_dense(&b);
     convert_dense_to_sparse(c, m, n, C);
     free_dense(&c);
     
+    #if SHOULD_PROFILE_BASIC
     LIKWID_MARKER_CLOSE;
+    #endif
 }
 
 /* Computes O = (A + B + C) (D + E + F) by converting to dense column
@@ -88,6 +106,13 @@ void basic_sparsemm_sum(const COO A, const COO B, const COO C,
                         const COO D, const COO E, const COO F,
                         COO *O)
 {
+
+    #if SHOULD_PROFILE_BASIC
+    LIKWID_MARKER_INIT;
+    LIKWID_MARKER_START("basic-sum-pre");
+    #endif
+
+
     double *a = NULL;
     double *b = NULL;
     double *c = NULL;
@@ -134,6 +159,12 @@ void basic_sparsemm_sum(const COO A, const COO B, const COO C,
     convert_sparse_to_dense(E, &e);
     convert_sparse_to_dense(F, &f);
 
+    #if SHOULD_PROFILE_BASIC
+    LIKWID_MARKER_STOP("basic-sum-pre");
+    LIKWID_MARKER_START("basic-sum");
+    #endif
+
+
     /* Compute sums */
     for (j = 0; j < k; j++) {
         for (i = 0; i < m; i++) {
@@ -152,8 +183,15 @@ void basic_sparsemm_sum(const COO A, const COO B, const COO C,
     alloc_dense(m, n, &c);
     zero_dense(m, n, c);
     dgemm(m, n, k, a, d, c);
+    #if SHOULD_PROFILE_BASIC
+    LIKWID_MARKER_STOP("basic-sum");
+    #endif
     free_dense(&a);
     free_dense(&d);
     convert_dense_to_sparse(c, m, n, O);
     free_dense(&c);
+
+    #if SHOULD_PROFILE_BASIC
+    LIKWID_MARKER_CLOSE;
+    #endif
 }

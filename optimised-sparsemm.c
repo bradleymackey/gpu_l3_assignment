@@ -2,7 +2,11 @@
 #include <stdlib.h>
 #include <stddef.h>
 
+#define SHOULD_PROFILE 1
+
+#if SHOULD_PROFILE
 #include <likwid.h>
+#endif
 
 
 // use `likwid` on Hamilton in order to measure performance of the routines
@@ -13,7 +17,6 @@ void basic_sparsemm(const COO, const COO, COO *);
 void basic_sparsemm_sum(const COO, const COO, const COO,
                         const COO, const COO, const COO,
                         COO *);
-
 
 
 /* ordering function for sorting COOs
@@ -379,7 +382,9 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, COO C) {
  */
 void optimised_sparsemm(const COO A, const COO B, COO *C) {
     
+    #if SHOULD_PROFILE
     LIKWID_MARKER_INIT;
+    #endif
 
     // m = A rows
     // n = B columns
@@ -399,17 +404,24 @@ void optimised_sparsemm(const COO A, const COO B, COO *C) {
     }
     
     // ensure the matrix entries are ordered in the way we expect!
+    #if SHOULD_PROFILE
     LIKWID_MARKER_START("pre-process-multi");
+    #endif
     order_coo_matrix(A);
     order_coo_matrix(B);
+    #if SHOULD_PROFILE
     LIKWID_MARKER_STOP("pre-process-multi");
+    #endif
 
     // perform the optimised matrix multiplication operation
+    #if SHOULD_PROFILE
     LIKWID_MARKER_START("optimised-multi");
+    #endif
     perform_sparse_optimised_multi(A, B, *C);
+    #if SHOULD_PROFILE
     LIKWID_MARKER_STOP("optimised-multi");
-    
     LIKWID_MARKER_CLOSE;
+    #endif
     
     //return basic_sparsemm(A,B,C);
     
@@ -503,7 +515,9 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
                             const COO D, const COO E, const COO F,
                             COO *O) {
     
+    #if SHOULD_PROFILE
     LIKWID_MARKER_INIT;
+    #endif
     
     // check that matrices are all compatible sizes
     int i, j, m, n, k;
@@ -538,8 +552,10 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
         exit(1);
     }
     
-    
+
+    #if SHOULD_PROFILE
     LIKWID_MARKER_START("optimised-sum-add");
+    #endif
 
     /* CREATE MULT MATRIX A */
     order_coo_matrix(B);
@@ -554,17 +570,16 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
     add_matrices(D,F);
     order_coo_matrix(D);
 
-    LIKWID_MARKER_STOP("optimised-sum-multi");
     
     // ensure there is no value currently stored at O
     *O = NULL;
     
     // perform the optimised matrix multiplication operation
-    LIKWID_MARKER_START("optimised-sum-multi");
     perform_sparse_optimised_multi(A, D, *O);
-    LIKWID_MARKER_STOP("optimised-sum-multi");
-    
+    #if SHOULD_PROFILE
+    LIKWID_MARKER_STOP("optimised-sum-add");
     LIKWID_MARKER_CLOSE;
+    #endif
     
     
 //    return basic_sparsemm_sum(A, B, C, D, E, F, O);
