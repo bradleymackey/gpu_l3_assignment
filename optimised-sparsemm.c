@@ -168,6 +168,10 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
     
     const int a_num_rows = A->m; // rows of A
     
+
+
+
+    
     // offsets of row values in the b matrix
     // used to easily locate row values in B
     int *b_row_val_offsets = row_offset_table(B);
@@ -198,6 +202,7 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
         // iterate over all b column values while the row of b matches `a`'s column
         // (just ensures that we don't run past the row of b we are interested in or run over the end of the array)
         int p;
+        #pragma acc kernels
         for (p = 0; p < B->m; p++) {
             
             b_row = B->coords[b_offset+p].i;
@@ -376,6 +381,7 @@ static void add_matrices(COO A, COO B) {
     int k, a_row, a_col, b_uniques;
     b_uniques = 0;
     double b_val;
+    #pragma acc kernels
     for (k = 0; k < A->NZ; k++) {
         a_row = A->coords[k].i;
         a_col = A->coords[k].j;
@@ -385,6 +391,7 @@ static void add_matrices(COO A, COO B) {
         A->data[k] += b_val;
     }
     
+    /* A now contains all common added values, B contains unique values that should be merged */
     merge_matrices(A, B, b_uniques);
     
     // B is now useless
@@ -440,19 +447,20 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
     
     
     LIKWID_MARKER_START("optimised-sum-add");
-    // CREATE MASTER MATRIX A (what we will multiply)
+
+    /* CREATE MULT MATRIX A */
     order_coo_matrix(B);
     add_matrices(A,B);
     order_coo_matrix(C);
     add_matrices(A,C);
     order_coo_matrix(A);
-    
-    // CREATE MASTER MATRIX D (what we will multiply)
+    /* CREATE MULT MATRIX D */
     order_coo_matrix(E);
     add_matrices(D,E);
     order_coo_matrix(F);
     add_matrices(D,F);
     order_coo_matrix(D);
+
     LIKWID_MARKER_STOP("optimised-sum-multi");
     
     // pointer to the O matrix that we will use to store the result
