@@ -1,5 +1,6 @@
 #include "utils.h"
 #include <stdlib.h>
+#include <stddef.h>
 
 #include <likwid.h>
 
@@ -15,40 +16,51 @@ void basic_sparsemm_sum(const COO, const COO, const COO,
 
 
 
+/* ordering function for sorting COOs
+ * works on a list of pointers to the values, because this is used to sort the pointers
+ */
 static int order_coo(const void *v1, const void *v2) {
+    /* pointer indirection, so we must initially dereference */
     struct coord *c1 = *(struct coord**)v1;
     struct coord *c2 = *(struct coord**)v2;
     int row_comp = c1->i - c2->i;
     if (row_comp != 0) return row_comp;
-    // if rows are the same, order by column
+    // if rows are the same, order by column instead
     return ( c1->j - c2->j );
 }
 
-// compares 2 COOs, such that we can order them for binary search
+/* compare coordinates FOR BINARY SEARCH ONLY */
 static int compare_coo_order_cols(const void *v1, const void *v2) {
     struct coord *c1 = (struct coord*)v1;
     struct coord *c2 = (struct coord*)v2;
-    // deref the coord and compare the column values
+    // only compare columns
+    // because we know they will be in the same row anyway, so don't waste time
     return ( c1->j - c2->j );
 }
 
 /* sorts elements in a COO such that we are ordered by row, then sub-ordered by column
  * pointer array sorted so we can order both the coordinate and data the same way
+ * (must be done this way because data and coordinates are stored in separate arrays, and we want them BOTH to be sorted according to the ordering of the coordinates)
  * technique thanks to: https://stackoverflow.com/a/32954558/3261161
+ * time complexity: O(nlogn)
+ * space complexity: O(n)
  */
 static void order_coo_matrix(COO M) {
     
+    /* an array that contains pointers to coordinates, these are sorted as a layer of indirection */
     struct coord **pointer_arr = (struct coord**)malloc(M->NZ*sizeof(struct coord*));
     
     /* create array of pointers to coords[] */
     int i;
+    #pragma acc kernels
     for(i = 0; i < M->NZ; i++)
         pointer_arr[i] = &(M->coords[i]);
     
     /* sort array of pointers */
     qsort(pointer_arr, M->NZ, sizeof(struct coord *), order_coo);
     
-    /* reorder coords[] and data[] according to the array of pointers */
+    /* reorder coords[] and data[] according to the array of pointers
+       - sorting is done in place to save memory */
     struct coord tc;
     double td;
     int k, j;
@@ -68,23 +80,11 @@ static void order_coo_matrix(COO M) {
             pointer_arr[k] = &(M->coords[k]);
         }
     }
+    
+    /* pointer array no longer needed */
+    free(pointer_arr);
 
 }
-
-//
-//
-///*
-// * Flips the sparse representation to be in the format:
-// * jn in vn
-// * from:
-// * in jn vn
-// * this helps to lookup values by column when we are doing the multiplication by another matrix
-// * in the current format, only row lookups are efficient due to the way the file is read into memory
-// * returns a modifies the contents at the pointer location with the flipped rows and columns
-// */
-//static void flipped_rows_columns(COO *flip, int num_elems) {
-//    qsort(flip, num_elems, sizeof(COO), compare_coo_order_cols);
-//}
 
 /*
  * preprocessing to allow for fast lookup of B elements by index
@@ -104,7 +104,7 @@ static int *row_offset_table(const COO B) {
     
     int rows_b = B->m;
     
-    // where we will store resultant array
+    /* offset table result */
     int *result = (int*)malloc(rows_b*sizeof(int));
     
     // keep track of row currently being seen and prior rows
@@ -114,6 +114,7 @@ static int *row_offset_table(const COO B) {
     prev_row = -1;
     
     int k;
+    #pragma acc kernels
     for (k = 0; k < B->NZ; k++) {
         
         // the row number for this coordinate
@@ -147,6 +148,7 @@ static int *row_offset_table(const COO B) {
     // fill any trailing memory cells that we did not reach
     // (because there are no cells in the matrix), with -1s
     int i;
+    #pragma acc kernels
     for (i = curr_row+1; i < rows_b; i++) {
         result[i] = -1;
     }
@@ -156,6 +158,8 @@ static int *row_offset_table(const COO B) {
 }
 
 
+/* performs the sparse matrix multiplication
+ */
 static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) {
     
     // the number of non-zero elements in A and B
@@ -172,8 +176,8 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, double *C) 
     register int a_row, a_col, b_row, b_col;
     register double a_val, b_val;
     
-    #pragma acc kernels
     int k;
+    #pragma acc kernels
     for (k = 0; k < nza; k++) {
         
         a_col = A->coords[k].j;
@@ -290,6 +294,7 @@ static double locate_matching_entry(COO M, int *row_offset_table, int row, int c
     register const int num_rows = M->m;
     register int row_offset_end = -1;
     register int k; // the last offset to check (so we know what range the row takes up)
+    #pragma acc kernels // ---> we need a way to break out once one thread has found it, or this may be slow
     for (k = row+1; k < num_rows; k++) {
         row_offset_end = row_offset_table[k];
         // if not -1 we have found an offset where we should step function
@@ -320,19 +325,22 @@ static double locate_matching_entry(COO M, int *row_offset_table, int row, int c
  * - entries from B we want to remove should have value zeroed out (otherwise duplicate row/cols will appear)
  * - result will not be ordered
  * (called from add matrices)
+ * time complexity: O(n)
+ * space complexity: O(n)
  */
 static void merge_matrices(COO A, COO B, int b_uniques) {
     
     // update A values to reflect the merge
     int old_a_size = A->NZ;
     A->NZ += b_uniques;
-    // realloc A so it's large enough to store b's unique entries as well
+    // realloc A so it's large enough to store B's unique entries as well
     A->coords = (struct coord*)realloc(A->coords,A->NZ*sizeof(struct coord));
     A->data = (double*)realloc(A->data,A->NZ*sizeof(double));
     
     // iterate over B and append all the entries to A
     int k,j;
     j = old_a_size;
+    #pragma acc kernels // ---> not sure if this can be vectorised because of dependcy on `j`?
     for (k = 0; k < B->NZ; k++) {
         // do not append if column is 0 - this value has already been added to A
         if (B->data[k] != 0.0) {
@@ -346,6 +354,9 @@ static void merge_matrices(COO A, COO B, int b_uniques) {
 
 /* add the matrices A and B, storing the result in A.
  * we require messing up entries of B (zeroing some out), so we dealloc B after because it is now useless
+ * DO NOT USE B AFTER DEALLOCATED
+ * time complexity: O(n)
+ * space complexity: O(n)
  */
 static void add_matrices(COO A, COO B) {
     
