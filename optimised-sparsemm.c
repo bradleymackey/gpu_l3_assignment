@@ -194,14 +194,6 @@ static int *row_offset_table(const COO B) {
     
 }
 
-/* reallocates memory for the sparse matrix (for use of the result matrix) */
-static void realloc_sparse(int NZ, COO C) {
-    C->coords = (struct coord*)realloc(NZ, sizeof(struct coord));
-    C->data = (double *)realloc(NZ, sizeof(double));
-}
-
-
-
 /* merges multiple partial row COOs into 1 single COO */
 // m is the number of rows result will have n is the number of columns result will have 
 static void merge_result_rows(int m, int n, COO *coo_list, COO result) {
@@ -213,7 +205,7 @@ static void merge_result_rows(int m, int n, COO *coo_list, COO result) {
     int total_items = 0;
     int k;
     for (k=0; ; k++) {
-        COO coo = coo_list[i];
+        COO coo = coo_list[k];
         if (coo == NULL)
             break;
         total_items += coo->NZ;
@@ -262,7 +254,7 @@ static void calculate_result_row(int a_col, COO A, int *a_row_offsets, COO B, in
     const int nza = A->NZ;
     const int nzb = B->NZ;
 
-    int b_offset = b_row_val_offsets[a_col];
+    int b_offset = b_row_offsets[a_col];
     if (b_offset == -1) {
         // if there is no offset for this row of `b`,
         // there is no row of `b` for this column of `a` to multiply with,
@@ -285,7 +277,7 @@ static void calculate_result_row(int a_col, COO A, int *a_row_offsets, COO B, in
     int a_row;
     for (a_row = 0; a_row < num_rows_a; a_row++) {
 
-        if (a_row_offsets[a_row] == NULL) {
+        if (a_row_offsets[a_row] == -1) {
             // this row does not exist in A, so skip this iteration
             continue;
         }
