@@ -99,28 +99,26 @@ static double locate_matching_entry(COO M, int *row_offset_table, int row, int c
     int row_offset = row_offset_table[row];
     if (row_offset == -1) return 0.0f;
     
-    register const int num_rows = M->m;
-    register int row_offset_end = -1;
-    register int k; // the last offset to check (so we know what range the row takes up)
+    const int num_rows = M->m;
+    int row_offset_end = -1;
+    int k; // the last offset to check (so we know what range the row takes up)
     #pragma acc kernels // ---> we need a way to break out once one thread has found it, or this may be slow
     for (k = row+1; k < num_rows; k++) {
         row_offset_end = row_offset_table[k];
         // if not -1 we have found an offset where we should step function
         if (row_offset_end != -1) break;
     }
+    /* if val is still -1, we should traverse all the way to the end of the list */
+    if (row_offset_end == -1)
+        row_offset_end = M->NZ;
     
-    if (row_offset_end == -1) {
-        // we should go all the way to the end of the row coordinate list
-        // this is because this is the last row
-        row_offset_end = M->NZ; // -1 because zero indexed array
-    }
-    
-    // perform a binary search to find the matching column value
+    /* binary search to find the matching column value */
     struct coord *col_ptr = (struct coord*)bsearch(&col, &(M->coords[row_offset]), row_offset_end-row_offset, sizeof(struct coord), compare_coo_order_cols);
+    if (col_ptr == NULL) printf("CANNOT FIND!\n");
     if (col_ptr == NULL) return 0.0f;
     
     // find the offset so we can get at the data value now
-    int index = (col_ptr-(M->coords))/sizeof(struct coord);
+    long int index = col_ptr-(M->coords);
     int result = M->data[index]; // data at the same index coordinates are at, so this is the data value
     if (zero_out) M->data[index] = 0.0f;
     return result;
@@ -528,7 +526,7 @@ static void merge_matrices(COO A, COO B, int b_uniques) {
 static void add_matrices(COO A, COO B) {
     
     // the one with more non-zero values should be A
-    // this reduces the amount of binary searching and reallocing we have to do
+    // this reduces the amount of binary searching and `reallocing` we have to do
     // (since this is only an add operation, order does not matter)
     if (B->NZ > A->NZ) {
         COO tmp = A;
@@ -536,23 +534,24 @@ static void add_matrices(COO A, COO B) {
         B = tmp;
     }
     
-    // to quickly jump to rows in B
+    /* b row offset table for reference */
     int *b_row_offset_table = row_offset_table(B);
     
     // go through each line of A
-    int k, a_row, a_col, b_uniques;
-    b_uniques = 0;
-    double b_val;
+    int k, a_row, a_col;
+    int b_uniques = 0;
     #pragma acc kernels
     for (k = 0; k < A->NZ; k++) {
         a_row = A->coords[k].i;
         a_col = A->coords[k].j;
+        printf("FINDING %d,%d in B\n",a_row,a_col);
         // find matching entry in B, then add to A.
-        b_val = locate_matching_entry(B,b_row_offset_table,a_row,a_col,1);
-        if (b_val != 0.0) b_uniques++;
-        A->data[k] += b_val;
+        double val = locate_matching_entry(B,b_row_offset_table,a_row,a_col,1);
+        printf("ADDING B:%.1f to A:%.1f\n", val, A->data[k]);
+        A->data[k] += val;
     }
-    
+
+
     /* A now contains all common added values, B contains unique values that should be merged */
     merge_matrices(A, B, b_uniques);
     
@@ -571,72 +570,78 @@ static void add_matrices(COO A, COO B) {
 void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
                             const COO D, const COO E, const COO F,
                             COO *O) {
-//
-//    #if SHOULD_PROFILE
-//    LIKWID_MARKER_INIT;
-//    #endif
-//
-//    // check that matrices are all compatible sizes
-//    int i, j, m, n, k;
-//
-//    m = A->m;
-//    k = A->n;
-//    n = D->n;
-//    if (A->m != B->m || A->n != B->n) {
-//        fprintf(stderr, "A (%d x %d) and B (%d x %d) are not the same shape\n",
-//                A->m, A->n, B->m, B->n);
-//        exit(1);
-//    }
-//    if (A->m != C->m || A->n != C->n) {
-//        fprintf(stderr, "A (%d x %d) and C (%d x %d) are not the same shape\n",
-//                A->m, A->n, C->m, C->n);
-//        exit(1);
-//    }
-//    if (D->m != E->m || D->n != E->n) {
-//        fprintf(stderr, "D (%d x %d) and E (%d x %d) are not the same shape\n",
-//                D->m, D->n, E->m, E->n);
-//        exit(1);
-//    }
-//    if (D->m != F->m || D->n != F->n) {
-//        fprintf(stderr, "D (%d x %d) and F (%d x %d) are not the same shape\n",
-//                D->m, D->n, F->m, F->n);
-//        exit(1);
-//    }
-//
-//    if (A->n != D->m) {
-//        fprintf(stderr, "Invalid matrix sizes, got %d x %d and %d x %d\n",
-//                A->m, A->n, D->m, D->n);
-//        exit(1);
-//    }
-//
-//
-//    #if SHOULD_PROFILE
-//    LIKWID_MARKER_START("optimised-sum-add");
-//    #endif
-//
-//    /* CREATE MULT MATRIX A */
-//    order_coo_matrix(B);
-//    add_matrices(A,B);
-//    order_coo_matrix(C);
-//    add_matrices(A,C);
-//    order_coo_matrix(A);
-//    /* CREATE MULT MATRIX D */
-//    order_coo_matrix(E);
-//    add_matrices(D,E);
-//    order_coo_matrix(F);
-//    add_matrices(D,F);
-//    order_coo_matrix(D);
-//
-//    // ensure there is no value currently stored at O
-//    *O = NULL;
-//
-//    // perform the optimised matrix multiplication operation
-//    perform_sparse_optimised_multi(A, D, O);
-//    #if SHOULD_PROFILE
-//    LIKWID_MARKER_STOP("optimised-sum-add");
-//    LIKWID_MARKER_CLOSE;
-//    #endif
-//
+
+    #if SHOULD_PROFILE
+    LIKWID_MARKER_INIT;
+    #endif
+
+    // check that matrices are all compatible sizes
+    int i, j, m, n, k;
+
+    m = A->m;
+    k = A->n;
+    n = D->n;
+    if (A->m != B->m || A->n != B->n) {
+        fprintf(stderr, "A (%d x %d) and B (%d x %d) are not the same shape\n",
+                A->m, A->n, B->m, B->n);
+        exit(1);
+    }
+    if (A->m != C->m || A->n != C->n) {
+        fprintf(stderr, "A (%d x %d) and C (%d x %d) are not the same shape\n",
+                A->m, A->n, C->m, C->n);
+        exit(1);
+    }
+    if (D->m != E->m || D->n != E->n) {
+        fprintf(stderr, "D (%d x %d) and E (%d x %d) are not the same shape\n",
+                D->m, D->n, E->m, E->n);
+        exit(1);
+    }
+    if (D->m != F->m || D->n != F->n) {
+        fprintf(stderr, "D (%d x %d) and F (%d x %d) are not the same shape\n",
+                D->m, D->n, F->m, F->n);
+        exit(1);
+    }
+
+    if (A->n != D->m) {
+        fprintf(stderr, "Invalid matrix sizes, got %d x %d and %d x %d\n",
+                A->m, A->n, D->m, D->n);
+        exit(1);
+    }
+
+
+    #if SHOULD_PROFILE
+    LIKWID_MARKER_START("optimised-sum-add");
+    #endif
+
+    /* CREATE MULT MATRIX A */
+    order_coo_matrix(B);
+    printf("Adding A and B:\n");
+    add_matrices(A,B);
+    order_coo_matrix(C);
+    printf("Adding A and C:\n");
+    add_matrices(A,C);
+    order_coo_matrix(A);
+    printf("Ordered A:\n");
+    print_sparse(A);
+    /* CREATE MULT MATRIX D */
+    order_coo_matrix(E);
+    add_matrices(D,E);
+    order_coo_matrix(F);
+    add_matrices(D,F);
+    order_coo_matrix(D);
+
+    // ensure there is no value currently stored at O
+    *O = NULL;
+
+    // perform the optimised matrix multiplication operation
+    perform_sparse_optimised_multi(A, D, O);
+
+
+    #if SHOULD_PROFILE
+    LIKWID_MARKER_STOP("optimised-sum-add");
+    LIKWID_MARKER_CLOSE;
+    #endif
+
     
-    return basic_sparsemm_sum(A, B, C, D, E, F, O);
+//    return basic_sparsemm_sum(A, B, C, D, E, F, O);
 }
