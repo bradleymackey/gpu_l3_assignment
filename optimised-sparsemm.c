@@ -199,23 +199,29 @@ static int *row_offset_table(const COO B) {
 
 /* merges multiple partial row COOs into 1 single COO */
 // m is the number of rows result will have n is the number of columns result will have 
-static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO result) {
+static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *final) {
+
+    *final = NULL;
 
     /* result is just the first entry (we will append other items to this) */
-    result = coo_list[0];
+    COO result = coo_list[0];
 
     /* allocate all the memory that we will need (so we pay less of a performance cost later - we don't want to realloc lots of times) */
     int total_items = 0;
     int k;
-    for (k=0; ; k++) {
+#pragma acc kernels
+    for (k=0; k<num_rows; k++) {
         COO coo = coo_list[k];
+        /* null list just means there are no values for this row! */
         if (coo == NULL)
-            break;
+            continue;
         total_items += coo->NZ;
     }
 
     printf("merge result rows\n");
-    /* allocate everything to be the final sizes that we will need */
+    /* allocate everything to be the final sizes that we will need
+     * this saves doing a `realloc` for each row we iterate through */
+    printf("total items are: %d\n", total_items);
     result->coords = (struct coord*)realloc(result->coords,total_items*sizeof(struct coord));
     result->data = (double *)realloc(result->data,total_items*sizeof(double));
     result->NZ = total_items;
@@ -231,7 +237,6 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO res
         COO coo = coo_list[i];
         if (coo == NULL) // no list here
             continue;
-        /* reallocate enough memory to fit the combined list */
         current_mem_offset += coo->NZ;
         
         /* copy coordinates and data into the result to combine them */
@@ -247,91 +252,108 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO res
         
     }
 
+    printf("the result is:\n");
+    print_sparse(result);
+    *final = result;
+
 }
 
 
 
 /* calculates a result row in the resultant matrix 
    - row will allocated by this routine */
-static void calculate_result_row(int a_col, COO A, int *a_row_offsets, COO B, int *b_row_offsets, COO *row_res) {
+static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, int *b_row_offsets, COO *row_res) {
 
 
-    const int num_rows_a = A->m;
+    printf("RESULT ROW: %d\n",a_row);
+
+    /* how big this resultant row will be */
+    const int num_cols_a = A->n;
+
     const int nza = A->NZ;
     const int nzb = B->NZ;
 
-    int b_offset = b_row_offsets[a_col];
-    if (b_offset == -1) {
-        // if there is no offset for this row of `b`,
-        // there is no row of `b` for this column of `a` to multiply with,
-        // so this `a` value is of no use,
-        // so skip
-        // there will be nothing in this row result and *row will remain NULL
+
+    int a_row_offset = a_row_offsets[a_row];
+    if (a_row_offset == -1) {
+        // if there is no offset for this row of A
+        // then there will be no result for this row
         *row_res = NULL;
         return;
     }
+
     
     // bear in mind this only represents a single row of the resultant matrix
-    // therefore the `m` and `n` for the size will not be accurate
-    alloc_sparse(B->m,A->n,num_rows_a,row_res);
+    // this is the values for only one row of this result
+    /* FINAL 1 row total (because this is just a result row) */
+    /* TEMP columns is num_cols_a (should fix when we remove 0 values) */
+    /* TEMP non-zeros num_cols_a (should fix when we remove 0 values) */
+    alloc_sparse(1,num_cols_a,num_cols_a,row_res);
     COO row = *row_res;
 
     int non_zero_elements = 0;
 
-    /* iterate over elements of A in the specified column */
+    /* iterate over elements of A in the specified row */
     double a_val, b_val;
-    int b_row, b_col;
-    int a_row;
-    for (a_row = 0; a_row < num_rows_a; a_row++) {
+    int b_row, a_col, b_col;
+    int a_itr, b_itr;
+    /* loop will overshoot, break when needed */
+    for (a_itr = 0; a_itr < num_cols_a; a_itr++) {
 
-        if (a_row_offsets[a_row] == -1) {
-            // this row does not exist in A, so skip this iteration
+        printf("A ITR: %d\n", a_itr);
+
+        /* check we are not shooting past the memory of the A COO */
+        if (a_row_offset + a_itr >= A->NZ)
+            break;
+
+        /* check we are still in the correct row, otherwise we are done */
+        // (do check here so we are more parallelisable)
+        if (A->coords[a_row_offset + a_itr].i != a_row)
+            break;
+
+        a_col = A->coords[a_row_offset + a_col].j;
+
+        /* find row of B that corresponds to this column of A */
+        int b_row_offset = b_row_offsets[a_col];
+        /* if row does not exist, jump to next A column */
+        if (b_row_offset == -1)
             continue;
-        }
 
-        // find the specific row/column value for A by binary search
-        a_val = locate_matching_entry(A,a_row_offsets,a_row,a_col,0);
-        if (a_val == 0.0) {
-            // there is no value, we cannot use this A
-            continue;
-        }
 
-        // we will perform up to `the number of columns of B` iterations - likley less unless a certain row of B is totally filled
-        // iterate over all b column values while the row of b matches `a`'s column
-        // (just ensures that we don't run past the row of b we are interested in or run over the end of the array)
-        int p;
-        for (p = 0; p < B->n; p++) {
-            
-            b_row = B->coords[b_offset+p].i;
-            
-            if (a_col != b_row || b_offset+p >= nzb) {
-                // only continue if current `a` column is equal to the current `b` row
-                // and we have not gone into the next column of `b`
-                // otherwise, there is nothing else we can do for this given `a` entry
+        /* loop will overshoot, break when end of row is reached */
+        for (b_itr = 0; b_itr < B->n; b_itr++) {
+
+            /* check we are not shooting past the memory of the B COO */
+            if (b_row_offset + b_itr >= B->NZ)
                 break;
-            }
-            
-            // once we know to continue, get column val of `b` and the value we will use to multiply
-            b_val = B->data[b_offset+p];
-            
-            // row = row of a
-            // column = col of b
-            // use a_num_rows because matrix cells are arranged in a column major format
-            // (required for proper conversion back to sparse)
-            row->coords[a_row].i = a_col;
-            row->coords[a_row].j = b_row;
-            row->data[a_row] += a_val * b_val;
-            non_zero_elements++;
-            
+
+            b_row = B->coords[b_row_offset + b_itr].i;
+            /* check we are still in the correct row of B, otherwise we are done */
+            /* (row of b corresponds to the column of A) */
+            if (b_row != a_col)
+                break;
+
+            b_col = B->coords[b_row_offset + b_itr].j;
+
+            /* row and column in context of the full matrix result */
+            row->coords[b_col].i = a_row;
+            row->coords[b_col].j = b_col;
+            /* if this is the first value for this column, increment non-zeros! */
+            if (row->data[b_col] == 0.0)
+                non_zero_elements++;
+            double result = A->data[a_row_offset + a_itr] * B->data[b_row_offset + b_itr];
+            printf("COL %d adding %.2f\n", b_col, result);
+            row->data[b_col] += A->data[a_row_offset + a_itr] * B->data[b_row_offset + b_itr];
         }
 
     }
+    
 
     /* arrange all elements so they maintain their order but are compressed to the top of the row */
     /* this allows us to free all the empty space taken up by the 0 cells */
-    int elem = 0; 
+    int elem = 0;
     int itr;
-    for (itr = 0; itr < num_rows_a; itr++) {
+    for (itr = 0; itr < num_cols_a; itr++) {
         if (row->data[itr] != 0.0) {
             row->coords[elem] = row->coords[itr];
             row->data[elem] = row->data[itr];
@@ -351,19 +373,19 @@ static void calculate_result_row(int a_col, COO A, int *a_row_offsets, COO B, in
 
 /* performs the sparse matrix multiplication
  */
-static void perform_sparse_optimised_multi(const COO A, const COO B, COO C) {
+static void perform_sparse_optimised_multi(const COO A, const COO B, COO *C) {
 
-    const int a_num_cols = A->n;
+    const int a_num_rows = A->m;
 
     /* offsets to easily locate row indices */
     int *a_row_offsets = row_offset_table(A);
     int *b_row_offsets = row_offset_table(B);
 
-    COO *to_merge = (COO *)malloc(a_num_cols*sizeof(COO));
+    COO *to_merge = (COO *)malloc(a_num_rows*sizeof(COO));
 
     COO row;
     int k;
-    for (k=0;k<a_num_cols;k++) {
+    for (k=0;k<a_num_rows;k++) {
         printf("calculate row: %d\n", k);
         calculate_result_row(k,A,a_row_offsets,B,b_row_offsets,&row);
         to_merge[k] = row;
@@ -371,6 +393,8 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, COO C) {
 
     /* merge the row results, to get the final matrix C! */
     merge_result_rows(A->m,A->n,B->m,to_merge,C);
+
+    printf("COO RESULT: %p\n", C);
 
     /* we no longer need the offset tables */
     free(a_row_offsets);
@@ -421,7 +445,7 @@ void optimised_sparsemm(const COO A, const COO B, COO *C) {
     #if SHOULD_PROFILE
     LIKWID_MARKER_START("optimised-multi");
     #endif
-    perform_sparse_optimised_multi(A, B, *C);
+    perform_sparse_optimised_multi(A, B, C);
     #if SHOULD_PROFILE
     LIKWID_MARKER_STOP("optimised-multi");
     LIKWID_MARKER_CLOSE;
@@ -578,7 +602,7 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
     *O = NULL;
     
     // perform the optimised matrix multiplication operation
-    perform_sparse_optimised_multi(A, D, *O);
+    perform_sparse_optimised_multi(A, D, O);
     #if SHOULD_PROFILE
     LIKWID_MARKER_STOP("optimised-sum-add");
     LIKWID_MARKER_CLOSE;
