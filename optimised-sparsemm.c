@@ -172,9 +172,8 @@ static int *row_offset_table(const COO B) {
                 // update difference with how many mem cells we should backfill with -1s
                 difference -= 1;
                 int d;
-                for (d = 1; d <= difference; d++) {
+                for (d = 1; d <= difference; d++)
                     result[curr_row-d] = -1;
-                }
             }
             
             // mark the index of where this row starts
@@ -200,7 +199,7 @@ static int *row_offset_table(const COO B) {
 
 /* merges multiple partial row COOs into 1 single COO */
 // m is the number of rows result will have n is the number of columns result will have 
-static void merge_result_rows(int m, int n, COO *coo_list, COO result) {
+static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO result) {
 
     /* result is just the first entry (we will append other items to this) */
     result = coo_list[0];
@@ -214,6 +213,8 @@ static void merge_result_rows(int m, int n, COO *coo_list, COO result) {
             break;
         total_items += coo->NZ;
     }
+
+    printf("merge result rows\n");
     /* allocate everything to be the final sizes that we will need */
     result->coords = (struct coord*)realloc(result->coords,total_items*sizeof(struct coord));
     result->data = (double *)realloc(result->data,total_items*sizeof(double));
@@ -223,13 +224,13 @@ static void merge_result_rows(int m, int n, COO *coo_list, COO result) {
 
     struct coord *coord_ptr;
     double *data_ptr;
-    int i, new_size;
+    int i;
     int current_mem_offset = 0;
     /* this needs to be executed serially */
-    for (i = 1; ; i++) {
+    for (i = 1; i<num_rows; i++) {
         COO coo = coo_list[i];
-        if (coo == NULL) // end of loop
-            break;
+        if (coo == NULL) // no list here
+            continue;
         /* reallocate enough memory to fit the combined list */
         current_mem_offset += coo->NZ;
         
@@ -252,7 +253,8 @@ static void merge_result_rows(int m, int n, COO *coo_list, COO result) {
 
 /* calculates a result row in the resultant matrix 
    - row will allocated by this routine */
-static void calculate_result_row(int a_col, COO A, int *a_row_offsets, COO B, int *b_row_offsets, COO row) {
+static void calculate_result_row(int a_col, COO A, int *a_row_offsets, COO B, int *b_row_offsets, COO *row_res) {
+
 
     const int num_rows_a = A->m;
     const int nza = A->NZ;
@@ -265,13 +267,14 @@ static void calculate_result_row(int a_col, COO A, int *a_row_offsets, COO B, in
         // so this `a` value is of no use,
         // so skip
         // there will be nothing in this row result and *row will remain NULL
+        *row_res = NULL;
         return;
     }
     
     // bear in mind this only represents a single row of the resultant matrix
     // therefore the `m` and `n` for the size will not be accurate
-    alloc_sparse(B->m,A->n,num_rows_a,&row);
-
+    alloc_sparse(B->m,A->n,num_rows_a,row_res);
+    COO row = *row_res;
 
     int non_zero_elements = 0;
 
@@ -341,6 +344,7 @@ static void calculate_result_row(int a_col, COO A, int *a_row_offsets, COO B, in
     row->NZ = non_zero_elements;
     row->coords = (struct coord*)realloc(row->coords,non_zero_elements*sizeof(struct coord));
     row->data = (double*)realloc(row->data,non_zero_elements*sizeof(double));
+    *row_res = row;
 
 }
 
@@ -355,19 +359,18 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, COO C) {
     int *a_row_offsets = row_offset_table(A);
     int *b_row_offsets = row_offset_table(B);
 
-    int merge_allocs_performed = 1;
-    COO *to_merge = (COO *)malloc((a_num_cols+1)*sizeof(COO *)); // add 1 for the null terminator
+    COO *to_merge = (COO *)malloc(a_num_cols*sizeof(COO));
 
     COO row;
-    int c;
-    for (c = 0; c < a_num_cols; c++) {
-        calculate_result_row(c,A,a_row_offsets,B,b_row_offsets,row);
-        to_merge[c] = row;
+    int k;
+    for (k=0;k<a_num_cols;k++) {
+        printf("calculate row: %d\n", k);
+        calculate_result_row(k,A,a_row_offsets,B,b_row_offsets,&row);
+        to_merge[k] = row;
     }
 
     /* merge the row results, to get the final matrix C! */
-    to_merge[c+1] = NULL; // null terminate the list
-    merge_result_rows(A->n,B->m,to_merge,C);
+    merge_result_rows(A->m,A->n,B->m,to_merge,C);
 
     /* we no longer need the offset tables */
     free(a_row_offsets);
