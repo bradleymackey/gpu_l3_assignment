@@ -201,10 +201,13 @@ static int *row_offset_table(const COO B) {
 // m is the number of rows result will have n is the number of columns result will have 
 static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *final) {
 
+    /* final should point to result when we are done */
     *final = NULL;
 
     /* result is just the first entry (we will append other items to this) */
     COO result = coo_list[0];
+
+    int first_len = result->NZ;
 
     /* allocate all the memory that we will need (so we pay less of a performance cost later - we don't want to realloc lots of times) */
     int total_items = 0;
@@ -231,24 +234,38 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
     struct coord *coord_ptr;
     double *data_ptr;
     int i;
-    int current_mem_offset = 0;
+    int current_mem_offset = 0x0;
     /* this needs to be executed serially */
     for (i = 1; i<num_rows; i++) {
         COO coo = coo_list[i];
         if (coo == NULL) // no list here
             continue;
-        current_mem_offset += coo->NZ;
+
+        /* offset to place value at */
+        if (i-1 == 0) {
+            current_mem_offset += first_len;
+        } else {
+            current_mem_offset += coo_list[i-1]->NZ;
+        }
+
+        printf(" ------ MERGING: %d ----- \n", i);
+        printf("NON-ZEROS: %d\n",coo->NZ);
+        printf("OFFSET: %d\n",current_mem_offset);
         
         /* copy coordinates and data into the result to combine them */
         coord_ptr = (result->coords)+current_mem_offset;
+        printf("coord pointer: %p\n",coord_ptr);
         memcpy(coord_ptr,coo->coords,coo->NZ*sizeof(struct coord));
         data_ptr = (result->data)+current_mem_offset;
+        printf("data pointer: %p\n", data_ptr);
         memcpy(data_ptr,coo->data,coo->NZ*sizeof(double));
+
+        printf("merged so far:\n");
+        print_sparse(result);
 
         /* free the old, unneeded old list (it is now in `result` so we need it no longer) */
         free(coo->coords);
         free(coo->data);
-        free(coo_list[i]);
         
     }
 
@@ -261,7 +278,7 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
 
 
 /* calculates a result row in the resultant matrix 
-   - row will allocated by this routine */
+   - row_res will allocated by this routine */
 static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, int *b_row_offsets, COO *row_res) {
 
 
@@ -294,13 +311,12 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
     int non_zero_elements = 0;
 
     /* iterate over elements of A in the specified row */
-    double a_val, b_val;
-    int b_row, a_col, b_col;
-    int a_itr, b_itr;
+    int b_row, a_col, b_col; // track real row and col positions
+    int a_itr, b_itr; // itr variables mark positions in the would-be full matrix
     /* loop will overshoot, break when needed */
     for (a_itr = 0; a_itr < num_cols_a; a_itr++) {
 
-        printf("A ITR: %d\n", a_itr);
+        // printf("A ITR: %d\n", a_itr);
 
         /* check we are not shooting past the memory of the A COO */
         if (a_row_offset + a_itr >= A->NZ)
@@ -311,7 +327,7 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
         if (A->coords[a_row_offset + a_itr].i != a_row)
             break;
 
-        a_col = A->coords[a_row_offset + a_col].j;
+        a_col = A->coords[a_row_offset + a_itr].j;
 
         /* find row of B that corresponds to this column of A */
         int b_row_offset = b_row_offsets[a_col];
@@ -333,6 +349,7 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
             if (b_row != a_col)
                 break;
 
+            /* b_col corresponds to position in output row */
             b_col = B->coords[b_row_offset + b_itr].j;
 
             /* row and column in context of the full matrix result */
@@ -341,13 +358,15 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
             /* if this is the first value for this column, increment non-zeros! */
             if (row->data[b_col] == 0.0)
                 non_zero_elements++;
+
             double result = A->data[a_row_offset + a_itr] * B->data[b_row_offset + b_itr];
-            printf("COL %d adding %.2f\n", b_col, result);
-            row->data[b_col] += A->data[a_row_offset + a_itr] * B->data[b_row_offset + b_itr];
+            printf("%d,%d adding %.2f\n", a_row, b_col, result);
+            printf("   -> A cell was %.2f\n", A->data[a_row_offset + a_itr]);
+            printf("   -> B cell was %.2f\n", B->data[b_row_offset + b_itr]);
+            row->data[b_col] += result;
         }
 
     }
-    
 
     /* arrange all elements so they maintain their order but are compressed to the top of the row */
     /* this allows us to free all the empty space taken up by the 0 cells */
@@ -367,6 +386,9 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
     row->coords = (struct coord*)realloc(row->coords,non_zero_elements*sizeof(struct coord));
     row->data = (double*)realloc(row->data,non_zero_elements*sizeof(double));
     *row_res = row;
+
+    printf("ROW %d is:\n", a_row);
+    print_sparse(row);
 
 }
 

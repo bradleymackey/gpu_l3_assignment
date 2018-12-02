@@ -10,7 +10,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d3a73caa-c3f2-4145-b6d4-ba4942498c80" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/optimised-sparsemm.c" beforeDir="false" afterPath="$PROJECT_DIR$/optimised-sparsemm.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/resulta.matrix" beforeDir="false" afterPath="$PROJECT_DIR$/resulta.matrix" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sparsemm.dSYM/Contents/Resources/DWARF/sparsemm" beforeDir="false" afterPath="$PROJECT_DIR$/sparsemm.dSYM/Contents/Resources/DWARF/sparsemm" afterDir="false" />
@@ -27,8 +27,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/optimised-sparsemm.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="469">
-              <caret line="349" column="4" selection-start-line="349" selection-start-column="4" selection-end-line="349" selection-end-column="4" />
+            <state relative-caret-position="246">
+              <caret line="338" column="25" lean-forward="true" selection-start-line="338" selection-start-column="25" selection-end-line="338" selection-end-column="25" />
               <folding>
                 <element signature="e#125#144#0" expanded="true" />
               </folding>
@@ -46,6 +46,14 @@
         </entry>
       </file>
     </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>locate_matching_entry</find>
+      <find>a_val</find>
+      <find>a_col</find>
+      <find>compare_coo_order_cols</find>
+    </findStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -107,12 +115,12 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1543767195521</updated>
-      <workItem from="1543767197573" duration="3900000" />
+      <workItem from="1543767197573" duration="7529000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="3900000" />
+    <option name="totallyTimeSpent" value="7529000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1185" height="1080" extended-state="6" />
@@ -152,8 +160,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/optimised-sparsemm.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="469">
-          <caret line="349" column="4" selection-start-line="349" selection-start-column="4" selection-end-line="349" selection-end-column="4" />
+        <state relative-caret-position="246">
+          <caret line="338" column="25" lean-forward="true" selection-start-line="338" selection-start-column="25" selection-end-line="338" selection-end-column="25" />
           <folding>
             <element signature="e#125#144#0" expanded="true" />
           </folding>
