@@ -311,8 +311,8 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
     int non_zero_elements = 0;
 
     /* iterate over elements of A in the specified row */
-    int b_row, a_col, b_col; // track real row and col positions
-    int a_itr, b_itr; // itr variables mark positions in the would-be full matrix
+    int b_row, a_col, b_col; // track real row and col positions in the would-be full matrix
+    int a_itr, b_itr; // itr variables keep track of positions in the COO files
     /* loop will overshoot, break when needed */
     for (a_itr = 0; a_itr < num_cols_a; a_itr++) {
 
@@ -414,7 +414,7 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, COO *C) {
     }
 
     /* merge the row results, to get the final matrix C! */
-    merge_result_rows(A->m,A->n,B->m,to_merge,C);
+    merge_result_rows(A->m,A->m,B->n,to_merge,C);
 
     printf("COO RESULT: %p\n", C);
 
@@ -453,21 +453,28 @@ void optimised_sparsemm(const COO A, const COO B, COO *C) {
         exit(1);
     }
     
-    // ensure the matrix entries are ordered in the way we expect!
+
     #if SHOULD_PROFILE
     LIKWID_MARKER_START("pre-process-multi");
     #endif
+
+    /* ensure COO files are ordered */
     order_coo_matrix(A);
     order_coo_matrix(B);
+
     #if SHOULD_PROFILE
     LIKWID_MARKER_STOP("pre-process-multi");
     #endif
 
-    // perform the optimised matrix multiplication operation
+
     #if SHOULD_PROFILE
     LIKWID_MARKER_START("optimised-multi");
     #endif
+
+    /* now multiply */
     perform_sparse_optimised_multi(A, B, C);
+
+
     #if SHOULD_PROFILE
     LIKWID_MARKER_STOP("optimised-multi");
     LIKWID_MARKER_CLOSE;
@@ -564,72 +571,72 @@ static void add_matrices(COO A, COO B) {
 void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
                             const COO D, const COO E, const COO F,
                             COO *O) {
+//
+//    #if SHOULD_PROFILE
+//    LIKWID_MARKER_INIT;
+//    #endif
+//
+//    // check that matrices are all compatible sizes
+//    int i, j, m, n, k;
+//
+//    m = A->m;
+//    k = A->n;
+//    n = D->n;
+//    if (A->m != B->m || A->n != B->n) {
+//        fprintf(stderr, "A (%d x %d) and B (%d x %d) are not the same shape\n",
+//                A->m, A->n, B->m, B->n);
+//        exit(1);
+//    }
+//    if (A->m != C->m || A->n != C->n) {
+//        fprintf(stderr, "A (%d x %d) and C (%d x %d) are not the same shape\n",
+//                A->m, A->n, C->m, C->n);
+//        exit(1);
+//    }
+//    if (D->m != E->m || D->n != E->n) {
+//        fprintf(stderr, "D (%d x %d) and E (%d x %d) are not the same shape\n",
+//                D->m, D->n, E->m, E->n);
+//        exit(1);
+//    }
+//    if (D->m != F->m || D->n != F->n) {
+//        fprintf(stderr, "D (%d x %d) and F (%d x %d) are not the same shape\n",
+//                D->m, D->n, F->m, F->n);
+//        exit(1);
+//    }
+//
+//    if (A->n != D->m) {
+//        fprintf(stderr, "Invalid matrix sizes, got %d x %d and %d x %d\n",
+//                A->m, A->n, D->m, D->n);
+//        exit(1);
+//    }
+//
+//
+//    #if SHOULD_PROFILE
+//    LIKWID_MARKER_START("optimised-sum-add");
+//    #endif
+//
+//    /* CREATE MULT MATRIX A */
+//    order_coo_matrix(B);
+//    add_matrices(A,B);
+//    order_coo_matrix(C);
+//    add_matrices(A,C);
+//    order_coo_matrix(A);
+//    /* CREATE MULT MATRIX D */
+//    order_coo_matrix(E);
+//    add_matrices(D,E);
+//    order_coo_matrix(F);
+//    add_matrices(D,F);
+//    order_coo_matrix(D);
+//
+//    // ensure there is no value currently stored at O
+//    *O = NULL;
+//
+//    // perform the optimised matrix multiplication operation
+//    perform_sparse_optimised_multi(A, D, O);
+//    #if SHOULD_PROFILE
+//    LIKWID_MARKER_STOP("optimised-sum-add");
+//    LIKWID_MARKER_CLOSE;
+//    #endif
+//
     
-    #if SHOULD_PROFILE
-    LIKWID_MARKER_INIT;
-    #endif
-    
-    // check that matrices are all compatible sizes
-    int i, j, m, n, k;
-    
-    m = A->m;
-    k = A->n;
-    n = D->n;
-    if (A->m != B->m || A->n != B->n) {
-        fprintf(stderr, "A (%d x %d) and B (%d x %d) are not the same shape\n",
-                A->m, A->n, B->m, B->n);
-        exit(1);
-    }
-    if (A->m != C->m || A->n != C->n) {
-        fprintf(stderr, "A (%d x %d) and C (%d x %d) are not the same shape\n",
-                A->m, A->n, C->m, C->n);
-        exit(1);
-    }
-    if (D->m != E->m || D->n != E->n) {
-        fprintf(stderr, "D (%d x %d) and E (%d x %d) are not the same shape\n",
-                D->m, D->n, E->m, E->n);
-        exit(1);
-    }
-    if (D->m != F->m || D->n != F->n) {
-        fprintf(stderr, "D (%d x %d) and F (%d x %d) are not the same shape\n",
-                D->m, D->n, F->m, F->n);
-        exit(1);
-    }
-    
-    if (A->n != D->m) {
-        fprintf(stderr, "Invalid matrix sizes, got %d x %d and %d x %d\n",
-                A->m, A->n, D->m, D->n);
-        exit(1);
-    }
-    
-
-    #if SHOULD_PROFILE
-    LIKWID_MARKER_START("optimised-sum-add");
-    #endif
-
-    /* CREATE MULT MATRIX A */
-    order_coo_matrix(B);
-    add_matrices(A,B);
-    order_coo_matrix(C);
-    add_matrices(A,C);
-    order_coo_matrix(A);
-    /* CREATE MULT MATRIX D */
-    order_coo_matrix(E);
-    add_matrices(D,E);
-    order_coo_matrix(F);
-    add_matrices(D,F);
-    order_coo_matrix(D);
-    
-    // ensure there is no value currently stored at O
-    *O = NULL;
-    
-    // perform the optimised matrix multiplication operation
-    perform_sparse_optimised_multi(A, D, O);
-    #if SHOULD_PROFILE
-    LIKWID_MARKER_STOP("optimised-sum-add");
-    LIKWID_MARKER_CLOSE;
-    #endif
-    
-    
-//    return basic_sparsemm_sum(A, B, C, D, E, F, O);
+    return basic_sparsemm_sum(A, B, C, D, E, F, O);
 }
