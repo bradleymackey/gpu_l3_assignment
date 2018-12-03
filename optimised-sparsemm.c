@@ -100,7 +100,7 @@ static double locate_matching_entry(COO M, int *row_offset_table, struct coord t
 //    if (row_offset == -1) printf("row of B does not exist\n");
     if (row_offset == -1) return 0.0f;
 
-    printf("find matching for %d,%d\n",to_find.i, to_find.j);
+//    printf("find matching for %d,%d\n",to_find.i, to_find.j);
     
     const int num_rows = M->m;
     int row_offset_end = -1;
@@ -109,24 +109,23 @@ static double locate_matching_entry(COO M, int *row_offset_table, struct coord t
     for (k = (to_find.i+1); k < num_rows; k++) {
         row_offset_end = row_offset_table[k];
         // if not -1 we have found an offset where we should step function
-        printf("row offset: %d, possible offset: %d\n",row_offset, row_offset_end);
+//        printf("row offset: %d, possible offset: %d\n",row_offset, row_offset_end);
         if (row_offset_end != -1) break;
     }
     /* if val is still -1, we should traverse all the way to the end of the list */
     if (row_offset_end == -1)
-        printf("no possible offset, going all the way to %d\n", M->NZ);
         row_offset_end = M->NZ;
 
     /* binary search to find the matching column value */
     struct coord *col_ptr = (struct coord*)bsearch(&to_find, row_offset+(M->coords), row_offset_end-row_offset, sizeof(struct coord), compare_coo_order_cols);
-//    if (col_ptr == NULL) printf("cannot find by bsearch\n");
     if (col_ptr == NULL) return 0.0f;
 
     // find the offset so we can get at the data value now
     const long index = col_ptr-(M->coords);
     const double result = M->data[index]; // data at the same index coordinates are at, so this is the data value
-//    printf("result is %.2f\n", result);
-    if (zero_out) M->data[index] = 0.0f;
+    if (zero_out) {
+        M->data[index] = 0.0f;
+    }
     return result;
     
 }
@@ -158,7 +157,7 @@ static int *row_offset_table(const COO B) {
     curr_row = 0;
     prev_row = -1;
 
-    printf("CREATING ROW OFFSET TABLE\n");
+//    printf("CREATING ROW OFFSET TABLE\n");
     
     int k;
     #pragma acc kernels
@@ -173,7 +172,7 @@ static int *row_offset_table(const COO B) {
         if (curr_row != prev_row) {
 
             // mark the index of where this row starts
-            printf("SET %d to %d\n",curr_row, k);
+//            printf("SET %d to %d\n",curr_row, k);
             result[curr_row] = k;
 
 
@@ -202,10 +201,10 @@ static int *row_offset_table(const COO B) {
         result[i] = -1;
     }
 
-    int itr;
-    for (itr = 0; itr < B->m; itr++) {
-        printf("TO RETURN %d: %d\n", itr, result[itr]);
-    }
+//    int itr;
+//    for (itr = 0; itr < B->m; itr++) {
+//        printf("TO RETURN %d: %d\n", itr, result[itr]);
+//    }
     
     return result;
     
@@ -235,10 +234,10 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
         total_items += coo->NZ;
     }
 
-    printf("merge result rows\n");
+//    printf("merge result rows\n");
     /* allocate everything to be the final sizes that we will need
      * this saves doing a `realloc` for each row we iterate through */
-    printf("total items are: %d\n", total_items);
+//    printf("total items are: %d\n", total_items);
     result->coords = (struct coord*)realloc(result->coords,total_items*sizeof(struct coord));
     result->data = (double *)realloc(result->data,total_items*sizeof(double));
     result->NZ = total_items;
@@ -262,20 +261,20 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
             current_mem_offset += coo_list[i-1]->NZ;
         }
 
-        printf(" ------ MERGING: %d ----- \n", i);
-        printf("NON-ZEROS: %d\n",coo->NZ);
-        printf("OFFSET: %d\n",current_mem_offset);
+//        printf(" ------ MERGING: %d ----- \n", i);
+//        printf("NON-ZEROS: %d\n",coo->NZ);
+//        printf("OFFSET: %d\n",current_mem_offset);
         
         /* copy coordinates and data into the result to combine them */
         coord_ptr = (result->coords)+current_mem_offset;
-        printf("coord pointer: %p\n",coord_ptr);
+//        printf("coord pointer: %p\n",coord_ptr);
         memcpy(coord_ptr,coo->coords,coo->NZ*sizeof(struct coord));
         data_ptr = (result->data)+current_mem_offset;
-        printf("data pointer: %p\n", data_ptr);
+//        printf("data pointer: %p\n", data_ptr);
         memcpy(data_ptr,coo->data,coo->NZ*sizeof(double));
 
-        printf("merged so far:\n");
-        print_sparse(result);
+//        printf("merged so far:\n");
+//        print_sparse(result);
 
         /* free the old, unneeded old list (it is now in `result` so we need it no longer) */
         free(coo->coords);
@@ -283,8 +282,8 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
         
     }
 
-//    printf("the result is:\n");
-    print_sparse(result);
+//    printf(" --- RESULT MATRIX ---:\n");
+//    print_sparse(result);
     *final = result;
 
 }
@@ -401,8 +400,8 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
     row->data = (double*)realloc(row->data,non_zero_elements*sizeof(double));
     *row_res = row;
 
-    printf("ROW %d is:\n", a_row);
-    print_sparse(row);
+//    printf("ROW %d is:\n", a_row);
+//    print_sparse(row);
 
 }
 
@@ -422,7 +421,7 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, COO *C) {
     COO row;
     int k;
     for (k=0;k<a_num_rows;k++) {
-        printf("calculate row: %d\n", k);
+//        printf("calculate row: %d\n", k);
         calculate_result_row(k,A,a_row_offsets,B,b_row_offsets,&row);
         to_merge[k] = row;
     }
@@ -430,7 +429,7 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, COO *C) {
     /* merge the row results, to get the final matrix C! */
     merge_result_rows(A->m,A->m,B->n,to_merge,C);
 
-    printf("COO RESULT: %p\n", C);
+//    printf("COO RESULT: %p\n", C);
 
     /* we no longer need the offset tables */
     free(a_row_offsets);
@@ -533,8 +532,8 @@ static void merge_matrices(COO *A, COO B, int b_uniques) {
         }
     }
 
-    printf("FULLY ADDED MERGED\n");
-    print_sparse(added);
+//    printf("FULLY ADDED MERGED\n");
+//    print_sparse(added);
 
     *A = added;
     
@@ -555,7 +554,7 @@ static void add_matrices(COO *A, COO B) {
     // this reduces the amount of binary searching and `reallocing` we have to do
     // (since this is only an add operation, order does not matter)
     if (B->NZ > added->NZ) {
-        printf("SWAPPING A AND B\n");
+//        printf("SWAPPING A AND B\n");
         COO tmp = added;
         added = B;
         B = tmp;
@@ -563,11 +562,11 @@ static void add_matrices(COO *A, COO B) {
     
     /* b row offset table for reference */
     int *b_row_offset_table = row_offset_table(B);
-    printf("TO ADD OFFSET TABLE:\n");
-    int itr;
-    for (itr = 0; itr < B->m; itr++) {
-        printf("READY! %d: %d\n", itr, b_row_offset_table[itr]);
-    }
+//    printf("TO ADD OFFSET TABLE:\n");
+//    int itr;
+//    for (itr = 0; itr < B->m; itr++) {
+//        printf("READY! %d: %d\n", itr, b_row_offset_table[itr]);
+//    }
 
     
     // go through each line of A
@@ -652,24 +651,24 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
     COO a_mut = A;
     COO *abc_added = &a_mut;
 
-    printf("A to add:\n");
-    print_sparse(A);
+//    printf("A to add:\n");
+//    print_sparse(A);
 
     order_coo_matrix(B);
-    printf("B to add:\n");
-    print_sparse(B);
+//    printf("B to add:\n");
+//    print_sparse(B);
     order_coo_matrix(C);
-    printf("C to add:\n");
-    print_sparse(C);
+//    printf("C to add:\n");
+//    print_sparse(C);
 
-    printf("Adding A+B:\n");
+    printf("Adding A+B\n");
     add_matrices(abc_added,B);
-    printf("Adding A+C:\n");
+    printf("Adding A+C\n");
     add_matrices(abc_added,C);
 
     order_coo_matrix(*abc_added);
     printf("ADDED A,B,C :):\n");
-    print_sparse(*abc_added);
+//    print_sparse(*abc_added);
 
 
     /* CREATE MULT MATRIX D */
@@ -678,17 +677,21 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
 
     order_coo_matrix(E);
     order_coo_matrix(F);
+    printf("Adding D+E\n");
     add_matrices(def_added,E);
+    printf("Adding D+F\n");
     add_matrices(def_added,F);
 
-
+    printf("ADDED D,E,F :):\n");
     order_coo_matrix(*def_added);
 
     // ensure there is no value currently stored at O
     *O = NULL;
 
     // perform the optimised matrix multiplication operation
+    printf("multiplying A*D...\n");
     perform_sparse_optimised_multi(*abc_added, *def_added, O);
+    printf("mult done!\n");
 
 
     #if SHOULD_PROFILE
