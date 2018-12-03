@@ -27,17 +27,26 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/optimised-sparsemm.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="504">
-              <caret line="596" column="34" lean-forward="true" selection-start-line="596" selection-start-column="34" selection-end-line="596" selection-end-column="34" />
+            <state relative-caret-position="376">
+              <caret line="569" column="24" lean-forward="true" selection-start-line="569" selection-start-column="24" selection-end-line="569" selection-end-column="24" />
               <folding>
                 <element signature="e#125#144#0" expanded="true" />
                 <element signature="e#15952#15992#0" expanded="true" />
                 <element signature="e#16033#16072#0" expanded="true" />
                 <element signature="e#16212#16275#0" expanded="true" />
-                <element signature="e#19252#19271#0" expanded="true" />
-                <element signature="e#20331#20372#0" expanded="true" />
-                <element signature="e#20893#20958#0" expanded="true" />
+                <element signature="e#20965#20984#0" expanded="true" />
+                <element signature="e#22044#22085#0" expanded="true" />
+                <element signature="e#23210#23275#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/basic-sparsemm.c">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="79">
+              <caret line="150" column="40" selection-start-line="150" selection-start-column="40" selection-end-line="150" selection-end-column="40" />
             </state>
           </provider>
         </entry>
@@ -122,19 +131,19 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1543767195521</updated>
-      <workItem from="1543767197573" duration="33092000" />
+      <workItem from="1543767197573" duration="37548000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="33092000" />
+    <option name="totallyTimeSpent" value="37548000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="946" height="1050" extended-state="6" />
+    <frame x="0" y="0" width="1315" height="1080" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Favorites" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17753339" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="CMake" weight="0.32970297" />
       <window_info anchor="bottom" id="Database Changes" />
@@ -186,18 +195,25 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/basic-sparsemm.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="79">
+          <caret line="150" column="40" selection-start-line="150" selection-start-column="40" selection-end-line="150" selection-end-column="40" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/optimised-sparsemm.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="596" column="34" lean-forward="true" selection-start-line="596" selection-start-column="34" selection-end-line="596" selection-end-column="34" />
+        <state relative-caret-position="376">
+          <caret line="569" column="24" lean-forward="true" selection-start-line="569" selection-start-column="24" selection-end-line="569" selection-end-column="24" />
           <folding>
             <element signature="e#125#144#0" expanded="true" />
             <element signature="e#15952#15992#0" expanded="true" />
             <element signature="e#16033#16072#0" expanded="true" />
             <element signature="e#16212#16275#0" expanded="true" />
-            <element signature="e#19252#19271#0" expanded="true" />
-            <element signature="e#20331#20372#0" expanded="true" />
-            <element signature="e#20893#20958#0" expanded="true" />
+            <element signature="e#20965#20984#0" expanded="true" />
+            <element signature="e#22044#22085#0" expanded="true" />
+            <element signature="e#23210#23275#0" expanded="true" />
           </folding>
         </state>
       </provider>

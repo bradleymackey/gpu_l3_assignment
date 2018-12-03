@@ -93,12 +93,12 @@ static void order_coo_matrix(COO M) {
 // finds a matching entry in the other matrix from the lookup table and then by binary search, returning the value of this element.
 // if zero_out is set, the value will be zeroed out after access
 // function is able to deal with COO files containing 0 entries
-// if entry is not able to be found, the `*not_found` flag will be set to 1, and we return 0
-// if we found an entry that is actually 0, we return 0 but the flag is NOT set (it remains 0)
+// if entry is not able to be found, the `*not_found_flag` will be SET TO 1, and we return 0
+// if we found an entry that is actually 0, we return 0 but the flag is NOT altered
 static double locate_matching_entry(COO M, int *row_offset_table, struct coord to_find, char zero_out, char *not_found_flag) {
     
     // check that there is a matching row in this matrix
-    int row_offset = row_offset_table[to_find.i];
+    const int row_offset = row_offset_table[to_find.i];
 //    if (row_offset == -1) printf("row of B does not exist\n");
     if (row_offset == -1) {
         *not_found_flag = 1;
@@ -118,8 +118,9 @@ static double locate_matching_entry(COO M, int *row_offset_table, struct coord t
         if (row_offset_end != -1) break;
     }
     /* if val is still -1, we should traverse all the way to the end of the list */
-    if (row_offset_end == -1)
+    if (row_offset_end == -1) {
         row_offset_end = M->NZ;
+    }
 
     /* binary search to find the matching column value */
     struct coord *col_ptr = (struct coord*)bsearch(&to_find, row_offset+(M->coords), row_offset_end-row_offset, sizeof(struct coord), compare_coo_order_cols);
@@ -167,7 +168,7 @@ static int *row_offset_table(const COO B) {
 
 //    printf("CREATING ROW OFFSET TABLE\n");
     
-    int k;
+    int k, backfill;
     #pragma acc kernels
     for (k = 0; k < B->NZ; k++) {
         
@@ -183,11 +184,10 @@ static int *row_offset_table(const COO B) {
 //            printf("SET %d to %d\n",curr_row, k);
             result[curr_row] = k;
 
-
             // perform backfill of -1 values if this is not the immediate next index
             // this is because if we have skipped some values in the our result array,
             // they could be filled with garbage data and we want them to be -1 to indicate there is no row for this index
-            int backfill = curr_row - prev_row - 1;
+            backfill = curr_row - prev_row - 1;
             // update difference with how many mem cells we should backfill with -1s
             int d;
             for (d = 1; d <= backfill; d++) {
@@ -228,9 +228,11 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
     /* result is just the first entry (we will append other items to this) */
     COO result = coo_list[0];
 
-    int first_len = result->NZ;
+    /* length of the first row, because we will lose this information when we realloc to fit all values */
+    const int first_len = result->NZ;
 
-    /* allocate all the memory that we will need (so we pay less of a performance cost later - we don't want to realloc lots of times) */
+    /* allocate all the memory that we will need (so we pay less of a performance cost later)
+     * rather than reallocating the memory to fit for each row that we add, we allocate it all right here and now! */
     int total_items = 0;
     int k;
 #pragma acc kernels
@@ -241,16 +243,13 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
             continue;
         total_items += coo->NZ;
     }
-
-//    printf("merge result rows\n");
-    /* allocate everything to be the final sizes that we will need
-     * this saves doing a `realloc` for each row we iterate through */
-//    printf("total items are: %d\n", total_items);
     result->coords = (struct coord*)realloc(result->coords,total_items*sizeof(struct coord));
     result->data = (double *)realloc(result->data,total_items*sizeof(double));
     result->NZ = total_items;
     result->m = m;
     result->n = n;
+
+
 
     struct coord *coord_ptr;
     double *data_ptr;
@@ -542,7 +541,6 @@ static void merge_matrices(COO *A, COO B, int b_uniques) {
             added->data[j] = B->data[k];
             added->coords[j] = B->coords[k];
             j++; // increment A memory location
-            printf("added %.2f to (%d,%d)\n", added->data[j-1],added->coords[j-1].i, added->coords[j-1].j);
         }
     }
 
@@ -560,9 +558,9 @@ static void merge_matrices(COO *A, COO B, int b_uniques) {
  * time complexity: O(n)
  * space complexity: O(n)
  */
-static void add_matrices(COO *A, COO B) {
+static void add_matrices(COO *A, COO B, COO C) {
 
-
+    /* de-ref A so we can work on the COO directly */
     COO added = *A;
     
     // the one with more non-zero values should be A
@@ -582,28 +580,25 @@ static void add_matrices(COO *A, COO B) {
 //        printf("READY! %d: %d\n", itr, b_row_offset_table[itr]);
 //    }
 
-    
-    // go through each line of A
     int k;
     int b_non_uniques = 0; // the number of elements of B for which there is a matching element in A
     char not_found_flag;
     double val;
     #pragma acc kernels
+    /* iterate over each line of A, to see if we can find B vals that correspond */
     for (k = 0; k < added->NZ; k++) {
         /* find matching entry in B, then add to A */
 //        printf("FINDING %d,%d in B\n",added->coords[k].i,added->coords[k].j);
         not_found_flag = 0;
         val = locate_matching_entry(B,b_row_offset_table,added->coords[k],1,&not_found_flag);
+        /* flag will not have been modified if we have found a data val */
         if (not_found_flag == 0) {
-//            printf("ADDING B:%.1f to A:%.1f\n", val, added->data[k]);
             added->data[k] += val;
             b_non_uniques++;
-        } else {
-            printf("-------> >> >>>> >> NOTHING TO ADD (%d)!!!!!! < ------------\n",k);
         }
-
     }
 
+    /* set the return pointer now we have done the calc */
     *A = added;
 
     /* A now contains all common added values, B contains unique values that should be merged */
@@ -611,9 +606,6 @@ static void add_matrices(COO *A, COO B) {
     if (unique_b_values != 0) {
         merge_matrices(A, B, unique_b_values);
     }
-
-    printf(" ------> After the merge:");
-    print_sparse(added);
     
     // B is now useless
     // (it got messed up bad when we were locating matching add values)
@@ -627,7 +619,7 @@ static void add_matrices(COO *A, COO B) {
 void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
                             const COO D, const COO E, const COO F,
                             COO *O) {
-
+//
     #if SHOULD_PROFILE
     LIKWID_MARKER_INIT;
     #endif
@@ -685,9 +677,9 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
 //    print_sparse(C);
 
     printf("Adding A+B\n");
-    add_matrices(abc_added,B);
+//    add_matrices(abc_added,B);
     printf("Adding A+C\n");
-    add_matrices(abc_added,C);
+    add_matrices(abc_added,B,C);
 
     order_coo_matrix(*abc_added);
     printf("ADDED A,B,C :):\n");
@@ -701,9 +693,9 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
     order_coo_matrix(E);
     order_coo_matrix(F);
     printf("Adding D+E\n");
-    add_matrices(def_added,E);
+//    add_matrices(def_added,E);
     printf("Adding D+F\n");
-    add_matrices(def_added,F);
+    add_matrices(def_added,E,F);
 
     printf("ADDED D,E,F :):\n");
     order_coo_matrix(*def_added);
@@ -722,6 +714,6 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
     LIKWID_MARKER_CLOSE;
     #endif
 
-    
+
 //    return basic_sparsemm_sum(A, B, C, D, E, F, O);
 }
