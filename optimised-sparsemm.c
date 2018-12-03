@@ -294,9 +294,6 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
    - row_res will allocated by this routine */
 static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, int *b_row_offsets, COO *row_res) {
 
-
-//    printf("RESULT ROW: %d\n",a_row);
-
     /* how big this resultant row will be */
     const int num_cols_a = A->n;
 
@@ -366,17 +363,21 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
             b_col = B->coords[b_row_offset + b_itr].j;
 
             /* row and column in context of the full matrix result */
-            row->coords[b_col].i = a_row;
-            row->coords[b_col].j = b_col;
-            /* if this is the first value for this column, increment non-zeros! */
-            if (row->data[b_col] == 0.0)
-                non_zero_elements++;
+            row->coords[b_itr].i = a_row;
+            row->coords[b_itr].j = b_col;
+
 
             double result = A->data[a_row_offset + a_itr] * B->data[b_row_offset + b_itr];
+
+            /* if this is the first value for this column, increment non-zeros! */
+            if (result != 0.0 && row->data[b_itr] == 0.0) {
+                non_zero_elements++;
+            }
+
 //            printf("%d,%d adding %.2f\n", a_row, b_col, result);
 //            printf("   -> A cell was %.2f\n", A->data[a_row_offset + a_itr]);
 //            printf("   -> B cell was %.2f\n", B->data[b_row_offset + b_itr]);
-            row->data[b_col] += result;
+            row->data[b_itr] += result;
         }
 
     }
@@ -393,6 +394,9 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
         }
     }
 
+//    printf("    ------->  ROW %d (before) <---------\n", a_row);
+//    print_sparse(row);
+
     /* strip the row down to keep only the memory we need (hopefully much smaller than before if very sparse!) */
     /* this works because all of the values we need have now been pushed to the top of the array, essentially 'squeezing out' the 0s */
     row->NZ = non_zero_elements;
@@ -400,8 +404,8 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
     row->data = (double*)realloc(row->data,non_zero_elements*sizeof(double));
     *row_res = row;
 
-//    printf("ROW %d is:\n", a_row);
-//    print_sparse(row);
+    printf("    ------->  ROW %d (after) <---------\n", a_row);
+    print_sparse(row);
 
 }
 
@@ -513,7 +517,7 @@ static void merge_matrices(COO *A, COO B, int b_uniques) {
     COO added = *A;
     
     // update A values to reflect the merge
-    int old_a_size = added->NZ;
+    const int old_a_size = added->NZ;
     added->NZ += b_uniques;
     // realloc A so it's large enough to store B's unique entries as well
     added->coords = (struct coord*)realloc(added->coords,added->NZ*sizeof(struct coord));
@@ -554,7 +558,6 @@ static void add_matrices(COO *A, COO B) {
     // this reduces the amount of binary searching and `reallocing` we have to do
     // (since this is only an add operation, order does not matter)
     if (B->NZ > added->NZ) {
-//        printf("SWAPPING A AND B\n");
         COO tmp = added;
         added = B;
         B = tmp;
