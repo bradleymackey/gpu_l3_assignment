@@ -11,8 +11,11 @@
   <component name="ChangeListManager">
     <list default="true" id="d3a73caa-c3f2-4145-b6d4-ba4942498c80" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/basic-sparsemm.c" beforeDir="false" afterPath="$PROJECT_DIR$/basic-sparsemm.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/optimised-sparsemm.c" beforeDir="false" afterPath="$PROJECT_DIR$/optimised-sparsemm.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/smallout_RRR.matrix" beforeDir="false" afterPath="$PROJECT_DIR$/smallout_RRR.matrix" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/smallout_GGG.matrix" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/smallout_RRR.matrix" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/smallout_XXY.matrix" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/sparsemm.dSYM/Contents/Resources/DWARF/sparsemm" beforeDir="false" afterPath="$PROJECT_DIR$/sparsemm.dSYM/Contents/Resources/DWARF/sparsemm" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
@@ -27,26 +30,17 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/optimised-sparsemm.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="376">
-              <caret line="569" column="24" lean-forward="true" selection-start-line="569" selection-start-column="24" selection-end-line="569" selection-end-column="24" />
+            <state relative-caret-position="598">
+              <caret line="699" column="35" lean-forward="true" selection-start-line="699" selection-start-column="35" selection-end-line="699" selection-end-column="35" />
               <folding>
                 <element signature="e#125#144#0" expanded="true" />
                 <element signature="e#15952#15992#0" expanded="true" />
                 <element signature="e#16033#16072#0" expanded="true" />
                 <element signature="e#16212#16275#0" expanded="true" />
-                <element signature="e#20965#20984#0" expanded="true" />
-                <element signature="e#22044#22085#0" expanded="true" />
-                <element signature="e#23210#23275#0" expanded="true" />
+                <element signature="e#21198#21217#0" expanded="true" />
+                <element signature="e#22277#22318#0" expanded="true" />
+                <element signature="e#23443#23508#0" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/basic-sparsemm.c">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="79">
-              <caret line="150" column="40" selection-start-line="150" selection-start-column="40" selection-end-line="150" selection-end-column="40" />
             </state>
           </provider>
         </entry>
@@ -77,6 +71,7 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/test.tst" />
+        <option value="$PROJECT_DIR$/basic-sparsemm.c" />
         <option value="$PROJECT_DIR$/optimised-sparsemm.c" />
       </list>
     </option>
@@ -131,19 +126,19 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1543767195521</updated>
-      <workItem from="1543767197573" duration="37548000" />
+      <workItem from="1543767197573" duration="40386000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="37548000" />
+    <option name="totallyTimeSpent" value="40386000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1315" height="1080" extended-state="6" />
+    <frame x="0" y="0" width="1126" height="1080" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Favorites" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.17753339" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.20848708" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="CMake" weight="0.32970297" />
       <window_info anchor="bottom" id="Database Changes" />
@@ -174,13 +169,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/utils.c">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
-          <caret line="49" column="29" lean-forward="true" selection-start-line="49" selection-start-column="29" selection-end-line="49" selection-end-column="29" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test.tst">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="476">
@@ -197,23 +185,30 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/basic-sparsemm.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="79">
-          <caret line="150" column="40" selection-start-line="150" selection-start-column="40" selection-end-line="150" selection-end-column="40" />
+        <state relative-caret-position="534">
+          <caret line="96" column="27" selection-start-line="96" selection-start-column="4" selection-end-line="96" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="576">
+          <caret line="127" column="33" lean-forward="true" selection-start-line="127" selection-start-column="33" selection-end-line="128" selection-end-column="37" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/optimised-sparsemm.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="376">
-          <caret line="569" column="24" lean-forward="true" selection-start-line="569" selection-start-column="24" selection-end-line="569" selection-end-column="24" />
+        <state relative-caret-position="598">
+          <caret line="699" column="35" lean-forward="true" selection-start-line="699" selection-start-column="35" selection-end-line="699" selection-end-column="35" />
           <folding>
             <element signature="e#125#144#0" expanded="true" />
             <element signature="e#15952#15992#0" expanded="true" />
             <element signature="e#16033#16072#0" expanded="true" />
             <element signature="e#16212#16275#0" expanded="true" />
-            <element signature="e#20965#20984#0" expanded="true" />
-            <element signature="e#22044#22085#0" expanded="true" />
-            <element signature="e#23210#23275#0" expanded="true" />
+            <element signature="e#21198#21217#0" expanded="true" />
+            <element signature="e#22277#22318#0" expanded="true" />
+            <element signature="e#23443#23508#0" expanded="true" />
           </folding>
         </state>
       </provider>

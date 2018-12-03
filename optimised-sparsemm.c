@@ -307,7 +307,6 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
     const int nza = A->NZ;
     const int nzb = B->NZ;
 
-
     int a_row_offset = a_row_offsets[a_row];
     if (a_row_offset == -1) {
         // if there is no offset for this row of A
@@ -315,7 +314,6 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
         *row_res = NULL;
         return;
     }
-
     
     // bear in mind this only represents a single row of the resultant matrix
     // this is the values for only one row of this result
@@ -411,8 +409,8 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
     row->data = (double*)realloc(row->data,non_zero_elements*sizeof(double));
     *row_res = row;
 
-    printf("    ------->  ROW %d (after) <---------\n", a_row);
-    print_sparse(row);
+//    printf("    ------->  ROW %d (after) <---------\n", a_row);
+//    print_sparse(row);
 
 }
 
@@ -558,7 +556,7 @@ static void merge_matrices(COO *A, COO B, int b_uniques) {
  * time complexity: O(n)
  * space complexity: O(n)
  */
-static void add_matrices(COO *A, COO B, COO C) {
+static void add_matrices(COO *A, COO B) {
 
     /* de-ref A so we can work on the COO directly */
     COO added = *A;
@@ -574,11 +572,6 @@ static void add_matrices(COO *A, COO B, COO C) {
     
     /* b row offset table for reference */
     int *b_row_offset_table = row_offset_table(B);
-//    printf("TO ADD OFFSET TABLE:\n");
-//    int itr;
-//    for (itr = 0; itr < B->m; itr++) {
-//        printf("READY! %d: %d\n", itr, b_row_offset_table[itr]);
-//    }
 
     int k;
     int b_non_uniques = 0; // the number of elements of B for which there is a matching element in A
@@ -677,9 +670,9 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
 //    print_sparse(C);
 
     printf("Adding A+B\n");
-//    add_matrices(abc_added,B);
+    add_matrices(abc_added,B);
     printf("Adding A+C\n");
-    add_matrices(abc_added,B,C);
+    add_matrices(abc_added,C);
 
     order_coo_matrix(*abc_added);
     printf("ADDED A,B,C :):\n");
@@ -693,9 +686,9 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
     order_coo_matrix(E);
     order_coo_matrix(F);
     printf("Adding D+E\n");
-//    add_matrices(def_added,E);
+    add_matrices(def_added,E);
     printf("Adding D+F\n");
-    add_matrices(def_added,E,F);
+    add_matrices(def_added,F);
 
     printf("ADDED D,E,F :):\n");
     order_coo_matrix(*def_added);

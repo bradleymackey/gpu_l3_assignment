@@ -25,6 +25,9 @@ static void dgemm(int m, int n, int k, const double *a, const double *b, double 
         for (p = 0; p < k; p++) {
             for (i = 0; i < m; i++) {
                 c[j*ldc + i] = c[j*ldc + i] + a[p*lda + i] * b[j*ldb + p];
+                if (j == 33 && i == 0) {
+                    printf("new RES val (0,33): %e\n", c[j*ldc + i]);
+                }
             }
         }
     }
@@ -166,14 +169,20 @@ void basic_sparsemm_sum(const COO A, const COO B, const COO C,
 
 
     /* Compute sums */
-    for (j = 0; j < k; j++) {
-        for (i = 0; i < m; i++) {
+    for (j = 0; j < k; j++) { // j = col
+        for (i = 0; i < m; i++) { // i = row
             a[j*m + i] += b[j*m + i] + c[j*m + i];
+            if (j == 7 && i == 0) {
+                printf("new A val (0,7): %e\n", a[j*m + i]);
+            }
         }
     }
     for (j = 0; j < n; j++) {
         for (i = 0; i < k; i++) {
             d[j*k + i] += e[j*k + i] + f[j*k + i];
+            if (j == 33 && i == 7) {
+                printf("new B val (7,33): %e\n", d[j*k + i]);
+            }
         }
     }
     free_dense(&b);
