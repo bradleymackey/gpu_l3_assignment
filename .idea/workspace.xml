@@ -10,10 +10,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d3a73caa-c3f2-4145-b6d4-ba4942498c80" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/test.tst" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/optimised-sparsemm.c" beforeDir="false" afterPath="$PROJECT_DIR$/optimised-sparsemm.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/resulta.matrix" beforeDir="false" afterPath="$PROJECT_DIR$/resulta.matrix" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sparsemm.dSYM/Contents/Resources/DWARF/sparsemm" beforeDir="false" afterPath="$PROJECT_DIR$/sparsemm.dSYM/Contents/Resources/DWARF/sparsemm" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
@@ -28,8 +26,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/optimised-sparsemm.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="94" column="64" lean-forward="true" selection-start-line="94" selection-start-column="64" selection-end-line="94" selection-end-column="64" />
+            <state relative-caret-position="459">
+              <caret line="186" column="57" lean-forward="true" selection-start-line="186" selection-start-column="57" selection-end-line="186" selection-end-column="57" />
               <folding>
                 <element signature="e#125#144#0" expanded="true" />
                 <element signature="e#15952#15992#0" expanded="true" />
@@ -80,6 +78,8 @@
       <find>merge_result_rows</find>
       <find>locate_matching_entry</find>
       <find>compare_coo_order_cols</find>
+      <find>row_offset_table</find>
+      <find>for</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -143,19 +143,19 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1543767195521</updated>
-      <workItem from="1543767197573" duration="21940000" />
+      <workItem from="1543767197573" duration="25965000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="21940000" />
+    <option name="totallyTimeSpent" value="25965000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1196" height="1050" extended-state="6" />
+    <frame x="0" y="0" width="953" height="1050" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Favorites" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.110918544" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.14050494" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="CMake" weight="0.32970297" />
       <window_info anchor="bottom" id="Database Changes" />
@@ -202,8 +202,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/optimised-sparsemm.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="94" column="64" lean-forward="true" selection-start-line="94" selection-start-column="64" selection-end-line="94" selection-end-column="64" />
+        <state relative-caret-position="459">
+          <caret line="186" column="57" lean-forward="true" selection-start-line="186" selection-start-column="57" selection-end-line="186" selection-end-column="57" />
           <folding>
             <element signature="e#125#144#0" expanded="true" />
             <element signature="e#15952#15992#0" expanded="true" />

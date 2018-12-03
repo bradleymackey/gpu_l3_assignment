@@ -97,32 +97,35 @@ static double locate_matching_entry(COO M, int *row_offset_table, struct coord t
     
     // check that there is a matching row in this matrix
     int row_offset = row_offset_table[to_find.i];
-    if (row_offset == -1) printf("row of B does not exist\n");
+//    if (row_offset == -1) printf("row of B does not exist\n");
     if (row_offset == -1) return 0.0f;
+
+    printf("find matching for %d,%d\n",to_find.i, to_find.j);
     
     const int num_rows = M->m;
     int row_offset_end = -1;
     int k; // the last offset to check (so we know what range the row takes up)
     #pragma acc kernels // ---> we need a way to break out once one thread has found it, or this may be slow
-    for (k = to_find.i+1; k < num_rows; k++) {
+    for (k = (to_find.i+1); k < num_rows; k++) {
         row_offset_end = row_offset_table[k];
         // if not -1 we have found an offset where we should step function
+        printf("row offset: %d, possible offset: %d\n",row_offset, row_offset_end);
         if (row_offset_end != -1) break;
     }
     /* if val is still -1, we should traverse all the way to the end of the list */
     if (row_offset_end == -1)
+        printf("no possible offset, going all the way to %d\n", M->NZ);
         row_offset_end = M->NZ;
 
     /* binary search to find the matching column value */
-    struct coord *col_ptr = (struct coord*)bsearch(&to_find, &(M->coords[row_offset]), row_offset_end-row_offset, sizeof(struct coord), compare_coo_order_cols);
-    if (col_ptr == NULL) printf("cannot find by bsearch\n");
+    struct coord *col_ptr = (struct coord*)bsearch(&to_find, row_offset+(M->coords), row_offset_end-row_offset, sizeof(struct coord), compare_coo_order_cols);
+//    if (col_ptr == NULL) printf("cannot find by bsearch\n");
     if (col_ptr == NULL) return 0.0f;
 
     // find the offset so we can get at the data value now
-    long index = col_ptr-(M->coords);
-
+    const long index = col_ptr-(M->coords);
     const double result = M->data[index]; // data at the same index coordinates are at, so this is the data value
-    printf("result is %.2f\n", result);
+//    printf("result is %.2f\n", result);
     if (zero_out) M->data[index] = 0.0f;
     return result;
     
@@ -144,16 +147,18 @@ static double locate_matching_entry(COO M, int *row_offset_table, struct coord t
  */
 static int *row_offset_table(const COO B) {
     
-    int rows_b = B->m;
+    const int rows_b = B->m;
     
     /* offset table result */
-    int *result = (int*)malloc(rows_b*sizeof(int));
+    int *const result = (int*)malloc(rows_b*sizeof(int));
     
     // keep track of row currently being seen and prior rows
     // used to know when we have already filled in offset for a particular row value
     int curr_row, prev_row;
     curr_row = 0;
     prev_row = -1;
+
+    printf("CREATING ROW OFFSET TABLE\n");
     
     int k;
     #pragma acc kernels
@@ -161,24 +166,27 @@ static int *row_offset_table(const COO B) {
         
         // the row number for this coordinate
         curr_row = B->coords[k].i;
+
+//        printf("k: %d, curr_row: %d, prev_row: %d\n", k, curr_row, prev_row);
         
         // if we have not marked the start of this row already...
         if (curr_row != prev_row) {
 
+            // mark the index of where this row starts
+            printf("SET %d to %d\n",curr_row, k);
+            result[curr_row] = k;
+
+
             // perform backfill of -1 values if this is not the immediate next index
             // this is because if we have skipped some values in the our result array,
             // they could be filled with garbage data and we want them to be -1 to indicate there is no row for this index
-            register int difference = curr_row - prev_row;
-            if (difference>1 && prev_row != -1) {
-                // update difference with how many mem cells we should backfill with -1s
-                difference -= 1;
-                int d;
-                for (d = 1; d <= difference; d++)
-                    result[curr_row-d] = -1;
+            int backfill = curr_row - prev_row - 1;
+            // update difference with how many mem cells we should backfill with -1s
+            int d;
+            for (d = 1; d <= backfill; d++) {
+//                printf("SET %d to -1\n", curr_row - d);
+                result[curr_row - d] = -1;
             }
-            
-            // mark the index of where this row starts
-            result[curr_row] = k;
 
             // ensure that we do not update value again, and waste valuable computation
             prev_row = curr_row;
@@ -192,6 +200,11 @@ static int *row_offset_table(const COO B) {
     #pragma acc kernels
     for (i = curr_row+1; i < rows_b; i++) {
         result[i] = -1;
+    }
+
+    int itr;
+    for (itr = 0; itr < B->m; itr++) {
+        printf("TO RETURN %d: %d\n", itr, result[itr]);
     }
     
     return result;
@@ -270,7 +283,7 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
         
     }
 
-    printf("the result is:\n");
+//    printf("the result is:\n");
     print_sparse(result);
     *final = result;
 
@@ -283,7 +296,7 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
 static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, int *b_row_offsets, COO *row_res) {
 
 
-    printf("RESULT ROW: %d\n",a_row);
+//    printf("RESULT ROW: %d\n",a_row);
 
     /* how big this resultant row will be */
     const int num_cols_a = A->n;
@@ -361,9 +374,9 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
                 non_zero_elements++;
 
             double result = A->data[a_row_offset + a_itr] * B->data[b_row_offset + b_itr];
-            printf("%d,%d adding %.2f\n", a_row, b_col, result);
-            printf("   -> A cell was %.2f\n", A->data[a_row_offset + a_itr]);
-            printf("   -> B cell was %.2f\n", B->data[b_row_offset + b_itr]);
+//            printf("%d,%d adding %.2f\n", a_row, b_col, result);
+//            printf("   -> A cell was %.2f\n", A->data[a_row_offset + a_itr]);
+//            printf("   -> B cell was %.2f\n", B->data[b_row_offset + b_itr]);
             row->data[b_col] += result;
         }
 
@@ -550,8 +563,12 @@ static void add_matrices(COO *A, COO B) {
     
     /* b row offset table for reference */
     int *b_row_offset_table = row_offset_table(B);
-    printf("THIS IS B:\n");
-    print_sparse(B);
+    printf("TO ADD OFFSET TABLE:\n");
+    int itr;
+    for (itr = 0; itr < B->m; itr++) {
+        printf("READY! %d: %d\n", itr, b_row_offset_table[itr]);
+    }
+
     
     // go through each line of A
     int k;
@@ -559,14 +576,14 @@ static void add_matrices(COO *A, COO B) {
     #pragma acc kernels
     for (k = 0; k < added->NZ; k++) {
         /* find matching entry in B, then add to A */
-        printf("FINDING %d,%d in B\n",added->coords[k].i,added->coords[k].j);
+//        printf("FINDING %d,%d in B\n",added->coords[k].i,added->coords[k].j);
         double val = locate_matching_entry(B,b_row_offset_table,added->coords[k],1);
         if (val != 0.0f) {
-            printf("ADDING B:%.1f to A:%.1f\n", val, added->data[k]);
+//            printf("ADDING B:%.1f to A:%.1f\n", val, added->data[k]);
             added->data[k] += val;
             b_non_uniques++;
         } else {
-            printf("NOTHING TO ADD\n");
+//            printf("NOTHING TO ADD\n");
         }
 
     }
