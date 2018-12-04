@@ -230,7 +230,7 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
     /* result will be the first entry in the matrix (we will append other items to this) */
     COO result;
 
-    /* memory offsets so we know where to memcpy from */
+    /* memory offsets so we know what offset to memcpy to */
     int memory_offsets[num_rows];
     int total_rows = 0;
     int total_items = 0;
