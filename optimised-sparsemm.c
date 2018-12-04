@@ -35,6 +35,8 @@ static void transpose_matrix(const COO *M) {
     (*M)->m = (*M)->n;
     (*M)->n = tmp;
 
+    /* transpose coordinate values */
+    /* data values stay put, because this is a transpose after all! */
     int i;
     #pragma acc kernels
     for (i = 0; i<(*M)->NZ; i++) {
@@ -128,13 +130,10 @@ static double locate_matching_entry_rows(COO M, int *row_offset_table, struct co
     
     // check that there is a matching row in this matrix
     const int row_offset = row_offset_table[to_find.i];
-//    if (row_offset == -1) printf("row of B does not exist\n");
     if (row_offset == -1) {
         *not_found_flag = 1;
         return 0.0f;
     }
-
-//    printf("find matching for %d,%d\n",to_find.i, to_find.j);
     
     const int num_rows = M->m;
     int row_offset_end = -1;
@@ -143,7 +142,6 @@ static double locate_matching_entry_rows(COO M, int *row_offset_table, struct co
     for (k = (to_find.i+1); k < num_rows; k++) {
         row_offset_end = row_offset_table[k];
         // if not -1 we have found an offset where we should step function
-//        printf("row offset: %d, possible offset: %d\n",row_offset, row_offset_end);
         if (row_offset_end != -1) break;
     }
     /* if val is still -1, we should traverse all the way to the end of the list */
@@ -471,22 +469,19 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, COO *C) {
     #endif
 
     /* if the output will have more columns than rows, calculate via distributed columns */
-    /* this will allow for better parellelisation */
+    /* this will allow for better parellelisation for this matrix */
     /* we do this by transposing both matrices and then swapping them */
     /* then, transpose result back at the end */
-    char COL_BASED_FRAGS; 
+    /* this allows us to use the same `row fragmenation` code, but calculating a column at a time instead */
+    /* only downside is the time required for swapping and transposing */
+    /* fortunatley, swap very, very quick and the transpose can be very easily parallelised! */
+    char COL_BASED_FRAGS = 0; 
     if (b_num_cols > a_num_rows) {
         printf("dividing by col!!!\n");
         COL_BASED_FRAGS = 1;
         swap_coos(&A,&B);
-        printf("A before:\n");
-        print_sparse(A);
         transpose_matrix(&A);
-        printf("A after:\n");
-        print_sparse(A);
         transpose_matrix(&B);
-    } else {
-        COL_BASED_FRAGS = 0;
     }
 
     order_coo_matrix_rows(A);
@@ -513,15 +508,10 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, COO *C) {
 
     /* merge the row results, to get the final matrix C! */
     merge_result_rows(A->m,A->m,B->n,to_merge,C);
-    printf("C data: %p:\n", (*C)->data);
 
     /* if we divided by cols, the result will be the transpose of what we expect */
     if (COL_BASED_FRAGS) {
-        printf("C before:\n");
-        print_sparse(*C);
         transpose_matrix(C);
-        printf("C after:\n");
-        print_sparse(*C);
     }
 
     /* we no longer need the offset tables */
@@ -641,19 +631,19 @@ static void add_matrices(COO *A, COO B) {
 
     int k;
     int b_non_uniques = 0; // the number of elements of B for which there is a matching element in A
-    char not_found_flag;
+    char not_found_flag = 0;
     double val;
     #pragma acc kernels
     /* iterate over each line of A, to see if we can find B vals that correspond */
+    /* we know that we iterate over each line of A in order, sorted by ROW, COL, so we can use this to narrow down the bsearch as we go */
     for (k = 0; k < added->NZ; k++) {
         /* find matching entry in B, then add to A */
-//        printf("FINDING %d,%d in B\n",added->coords[k].i,added->coords[k].j);
-        not_found_flag = 0;
         val = locate_matching_entry_rows(B,b_row_offset_table,added->coords[k],1,&not_found_flag);
         /* flag will not have been modified if we have found a data val */
         if (not_found_flag == 0) {
             added->data[k] += val;
             b_non_uniques++;
+            not_found_flag = 0;
         }
     }
 
