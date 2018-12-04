@@ -27,17 +27,20 @@ void basic_sparsemm_sum(const COO, const COO, const COO,
 
 
 /* transposes any COO (does not have to be ordered or anything) */
-static void transpose_matrix(COO M) {
+static void transpose_matrix(const COO *M) {
 
-    struct coord item;
+    /* transpose header */
     int tmp;
+    tmp = (*M)->m;
+    (*M)->m = (*M)->n;
+    (*M)->n = tmp;
+
     int i;
     #pragma acc kernels
-    for (i = 0; i<M->NZ; i++) {
-        item = M->coords[i];
-        tmp = item.i;
-        item.i = item.j;
-        item.j = tmp;
+    for (i = 0; i<(*M)->NZ; i++) {
+        tmp = (*M)->coords[i].i;
+        (*M)->coords[i].i = (*M)->coords[i].j;
+        (*M)->coords[i].j = tmp;
     }
 
 }
@@ -433,7 +436,13 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
 /* used in `perform_sparse_optimised_multi` if we divide by row */
 static void swap_coos(const COO *A, const COO *B) {
 
-    COO tmp = *A;
+    /* must make explict copy of each item of A to avoid unintended sharing */
+    COO tmp;
+    tmp->NZ = (*A)->NZ;
+    tmp->coords = (*A)->coords;
+    tmp->data = (*A)->data;
+    tmp->m = (*A)->m;
+    tmp->n = (*A)->n;
 
     (*A)->NZ = (*B)->NZ;
     (*A)->coords = (*B)->coords;
@@ -467,10 +476,15 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, COO *C) {
     /* then, transpose result back at the end */
     char COL_BASED_FRAGS; 
     if (b_num_cols > a_num_rows) {
+        printf("dividing by col!!!\n");
         COL_BASED_FRAGS = 1;
         swap_coos(&A,&B);
-        transpose_matrix(A);
-        transpose_matrix(B);
+        printf("A before:\n");
+        print_sparse(A);
+        transpose_matrix(&A);
+        printf("A after:\n");
+        print_sparse(A);
+        transpose_matrix(&B);
     } else {
         COL_BASED_FRAGS = 0;
     }
@@ -499,10 +513,15 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, COO *C) {
 
     /* merge the row results, to get the final matrix C! */
     merge_result_rows(A->m,A->m,B->n,to_merge,C);
+    printf("C data: %p:\n", (*C)->data);
 
     /* if we divided by cols, the result will be the transpose of what we expect */
     if (COL_BASED_FRAGS) {
-        transpose_matrix(*C);
+        printf("C before:\n");
+        print_sparse(*C);
+        transpose_matrix(C);
+        printf("C after:\n");
+        print_sparse(*C);
     }
 
     /* we no longer need the offset tables */
