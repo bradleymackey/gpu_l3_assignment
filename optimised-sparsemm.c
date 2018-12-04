@@ -26,6 +26,23 @@ void basic_sparsemm_sum(const COO, const COO, const COO,
                         COO *);
 
 
+/* transposes any COO (does not have to be ordered or anything) */
+static void transpose_matrix(COO M) {
+
+    struct coord item;
+    int tmp;
+    int i;
+    #pragma acc kernels
+    for (i = 0; i<M->NZ; i++) {
+        item = M->coords[i];
+        tmp = item.i;
+        item.i = item.j;
+        item.j = tmp;
+    }
+
+}
+
+
 /* function to order a COO by ROW, then COL */
 static int order_coo_rows(const void *v1, const void *v2) {
     /* pointer indirection, so we must initially dereference */
@@ -37,16 +54,6 @@ static int order_coo_rows(const void *v1, const void *v2) {
     return ( c1->j - c2->j );
 }
 
-/* function to order a COO by COL, then ROW */
-static int order_coo_cols(const void *v1, const void *v2) {
-    struct coord *c1 = *(struct coord**)v1;
-    struct coord *c2 = *(struct coord**)v2;
-    int col_comp = c1->j - c2->j;
-    if (col_comp != 0) return col_comp;
-    // if rows are the same, order by row instead
-    return ( c1->i - c2->i );
-}
-
 /* compare coordinates FOR BINARY SEARCH ONLY when sorted by ROW, COL */
 static int bin_compare_rows(const void *v1, const void *v2) {
     struct coord *c1 = (struct coord*)v1;
@@ -55,13 +62,6 @@ static int bin_compare_rows(const void *v1, const void *v2) {
     return ( c1->j - c2->j );
 }
 
-/* compare coordinates FOR BINARY SEARCH ONLY when sorted by COL, ROW */
-static int bin_compare_cols(const void *v1, const void *v2) {
-    struct coord *c1 = (struct coord*)v1;
-    struct coord *c2 = (struct coord*)v2;
-    /* compare ROWS because we should be in same COL anyway */
-    return ( c1->i - c2->i );
-}
 
 /* sorts elements in a COO such that we are ordered by row, then sub-ordered by column
  * pointer array sorted so we can order both the coordinate and data the same way
@@ -114,48 +114,6 @@ static void order_coo_matrix_rows(COO M) {
 
 }
 
-static void order_coo_matrix_cols(COO M) {
-    
-    /* an array that contains pointers to coordinates, these are sorted as a layer of indirection */
-    // TODO: sort on the stack if at all possible? -> so much faster (SO for large COOs)
-    struct coord **pointer_arr = (struct coord**)malloc(M->NZ*sizeof(struct coord*));
-    //struct coord *pointer_arr[M->NZ];
-    
-    /* create array of pointers to coords[] */
-    int i;
-    #pragma acc kernels
-    for(i = 0; i < M->NZ; i++)
-        pointer_arr[i] = &(M->coords[i]);
-    
-    /* sort array of pointers */
-    qsort(pointer_arr, M->NZ, sizeof(struct coord *), order_coo_cols);
-    
-    /* reorder coords[] and data[] according to the array of pointers
-       - sorting is done in place to save memory */
-    struct coord tc;
-    double td;
-    int k, j;
-    for(i = 0; i < M->NZ; i++){
-        if(i != pointer_arr[i]-(M->coords)){
-            tc = M->coords[i];
-            td = M->data[i];
-            k = i;
-            while(i != (j = pointer_arr[k]-(M->coords))){
-                M->coords[k] = M->coords[j];
-                M->data[k] = M->data[j];
-                pointer_arr[k] = &(M->coords[k]);
-                k = j;
-            }
-            M->coords[k] = tc;
-            M->data[k] = td;
-            pointer_arr[k] = &(M->coords[k]);
-        }
-    }
-    
-    /* pointer array no longer needed */
-   free(pointer_arr);
-
-}
 
 // finds a matching entry in the other matrix from the lookup table and then by binary search, returning the value of this element.
 // if zero_out is set, the value will be zeroed out after access
@@ -207,42 +165,6 @@ static double locate_matching_entry_rows(COO M, int *row_offset_table, struct co
     
 }
 
-static double locate_matching_entry_cols(COO M, int *col_offset_table, struct coord to_find, char zero_out, char *not_found_flag) {
-
-    const int col_offset = col_offset_table[to_find.j];
-    if (col_offset == -1) {
-        *not_found_flag = 1;
-        return 0.0f;
-    }
-    
-    const int num_cols = M->n;
-    int col_offset_end = -1;
-    int k;
-    #pragma acc kernels
-    for (k = (to_find.j+1); k < num_cols; k++) {
-        col_offset_end = col_offset_table[k];
-        if (col_offset_end != -1) break;
-    }
-
-    if (col_offset_end == -1) {
-        col_offset_end = M->NZ;
-    }
-
-    struct coord *row_ptr = (struct coord*)bsearch(&to_find, col_offset+(M->coords), col_offset_end-col_offset, sizeof(struct coord), bin_compare_cols);
-    if (row_ptr == NULL) {
-        *not_found_flag = 1;
-        return 0.0f;
-    }
-
-    const long index = row_ptr-(M->coords);
-    const double result = M->data[index];
-    if (zero_out) {
-        M->data[index] = 0.0f;
-    }
-    return result;
-    
-}
-
 /*
  * preprocessing to allow for fast lookup of B elements by index
  * returns an array of the offsets of the elements in B, by row.
@@ -269,8 +191,6 @@ static int *row_offset_table(const COO M) {
     int curr_row, prev_row;
     curr_row = 0;
     prev_row = -1;
-
-//    printf("CREATING ROW OFFSET TABLE\n");
     
     int k, backfill;
     #pragma acc kernels
@@ -316,49 +236,10 @@ static int *row_offset_table(const COO M) {
     return result;
     
 }
-static int *col_offset_table(const COO M) {
-    
-    const int num_cols = M->n;
-    
-    /* offset table result */
-    int *const result = (int*)malloc(num_cols*sizeof(int));
-    
-    int curr_col, prev_col;
-    curr_col = 0;
-    prev_col = -1;
-    
-    int k, backfill;
-    #pragma acc kernels
-    for (k = 0; k < M->NZ; k++) {
-
-        curr_col = M->coords[k].i;
-
-        if (curr_col != prev_col) {
-            result[curr_col] = k;
-            backfill = curr_col - prev_col - 1;
-            int d;
-            for (d = 1; d <= backfill; d++) {
-                result[curr_col - d] = -1;
-            }
-            prev_col = curr_col;
-        }
-        
-    }
-    
-    /* backfill trailing with -1s */
-    int i;
-    #pragma acc kernels
-    for (i = curr_col+1; i < num_cols; i++) {
-        result[i] = -1;
-    }
-    
-    return result;
-    
-}
 
 /* merges multiple partial row COOs into 1 single COO */
 // m is the number of rows result will have n is the number of columns result will have 
-static void merge_result_rows_or_cols(int num_rows_or_cols, int m, int n, COO *coo_list, COO *final) {
+static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *final) {
 
     /* final should point to result when we are done */
     *final = NULL;
@@ -367,24 +248,24 @@ static void merge_result_rows_or_cols(int num_rows_or_cols, int m, int n, COO *c
     COO result;
 
     /* memory offsets so we know what offset to memcpy to */
-    int memory_offsets[num_rows_or_cols];
-    int total_rows_or_cols = 0;
+    int memory_offsets[num_rows];
+    int total_rows = 0;
     int total_items = 0;
     int i;
     COO coo;
     /* must be executed sequentially due to depencies on prior offsets */
-    for (i=0;i<num_rows_or_cols;i++) {
+    for (i=0;i<num_rows;i++) {
         coo = coo_list[i];
         if (coo == NULL) {
             /* if this row does not exist, there is no offset */
             memory_offsets[i] = -1;
         } else {
             /* if this is the first row we have encountered, it will be the one we append everything to */
-            if (total_rows_or_cols == 0) result = coo;
+            if (total_rows == 0) result = coo;
             /* update memory offset for this row */
             memory_offsets[i] = total_items;
             total_items += coo->NZ;
-            total_rows_or_cols++;
+            total_rows++;
         }
     }
 
@@ -404,7 +285,7 @@ static void merge_result_rows_or_cols(int num_rows_or_cols, int m, int n, COO *c
     double *data_ptr;
     int mem_offset;
     #pragma acc kernels
-    for (i = 0; i<num_rows_or_cols; i++) {
+    for (i = 0; i<num_rows; i++) {
         /* if there is no offset (-1), there is no row */
         /* if row is 0, this is the first row, and it's result is already in the result! */
         mem_offset = memory_offsets[i];
@@ -463,7 +344,7 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
     int b_row, a_col, b_col; // track real row and col positions in the would-be full matrix
     int a_itr, b_itr; // itr variables keep track of positions in the COO files
     int b_row_offset;
-    double result;
+    double result, prev_val;
     /* loop will overshoot, break when needed */
     for (a_itr = 0; a_itr < num_cols_a; a_itr++) {
 
@@ -508,18 +389,15 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
             row->coords[b_col].j = b_col;
 
             result = A->data[a_row_offset + a_itr] * B->data[b_row_offset + b_itr];
+            prev_val = row->data[b_col];
 
 
             /* if this is the first value for this column, increment non-zeros! */
-            if (result != 0.0 && row->data[b_col] == 0.0) {
+            if (result != 0.0 && prev_val == 0.0) {
                 non_zero_elements++;
             }
 
-
-//            printf("%d,%d adding %.2f\n", a_row, b_col, result);
-//            printf("   -> A cell was %.2f\n", A->data[a_row_offset + a_itr]);
-//            printf("   -> B cell was %.2f\n", B->data[b_row_offset + b_itr]);
-            row->data[b_col] += result;
+            row->data[b_col] = prev_val + result;
         }
 
     }
@@ -551,98 +429,24 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
 
 }
 
+/* swaps the internal values of 2 const coos */
+/* used in `perform_sparse_optimised_multi` if we divide by row */
+static void swap_coos(const COO *A, const COO *B) {
 
-static void calculate_result_col(int b_col, COO A, int *a_col_offsets, COO B, int *b_col_offsets, COO *col_res) {
+    COO tmp = *A;
 
-    /* how big this resultant col will be */
-    // num_cols_a
-    const int num_rows_b = B->m;
+    (*A)->NZ = (*B)->NZ;
+    (*A)->coords = (*B)->coords;
+    (*A)->data = (*B)->data;
+    (*A)->m = (*B)->m;
+    (*A)->n = (*B)->n;
 
-    // a_row_offset
-    int b_col_offset = b_col_offsets[b_col];
-    if (b_col_offset == -1) {
-        *col_res = NULL;
-        return;
-    }
+    (*B)->NZ = tmp->NZ;
+    (*B)->coords = tmp->coords;
+    (*B)->data = tmp->data;
+    (*B)->m = tmp->m;
+    (*B)->n = tmp->n;
 
-    alloc_sparse(1,num_rows_b,num_rows_b,col_res);
-    COO col = *col_res;
-
-    int non_zero_elements = 0;
-
-    /* iterate over elements of A in the specified row */
-    int b_row, a_col, a_row; // track real row and col positions in the would-be full matrix
-    int a_itr, b_itr; // itr variables keep track of positions in the COO files
-    int a_col_offset;
-    double result;
-    /* loop will overshoot, break when needed */
-    for (b_itr = 0; a_itr < num_rows_b; a_itr++) {
-
-        /* check we are not shooting past the memory of the B COO */
-        if (b_col_offset + b_itr >= B->NZ)
-            break;
-
-        /* check we are still in the correct col, otherwise we are done */
-        // (do check here so we are more parallelisable)
-        if (B->coords[b_col_offset + b_itr].j != b_col)
-            break;
-
-        b_row = B->coords[b_col_offset + b_itr].i;
-
-        /* find col of A that corresponds to this row of B */
-        a_col_offset = a_col_offsets[b_row];
-        /* if col does not exist, jump to next B column */
-        if (a_col_offset == -1)
-            continue;
-
-
-        /* loop will overshoot, break when end of col is reached */
-        for (a_itr = 0; a_itr < A->m; a_itr++) {
-
-            /* check we are not shooting past the memory of the A COO */
-            if (a_col_offset + a_itr >= A->NZ)
-                break;
-
-            a_col = A->coords[a_col_offset + a_itr].j;
-            /* check we are still in the correct col of A, otherwise we are done */
-            /* (row of b corresponds to the column of A) */
-            if (a_col != b_row)
-                break;
-
-            /* a_row corresponds to position in output row */
-            a_row = A->coords[a_col_offset + a_itr].i;
-
-            /* row and column in context of the full matrix result */
-            col->coords[a_row].i = a_row;
-            col->coords[a_row].j = b_col;
-
-            result = B->data[b_col_offset + b_itr] * A->data[a_col_offset + a_itr];
-
-
-            /* if this is the first value for this column, increment non-zeros! */
-            if (result != 0.0 && col->data[a_row] == 0.0) {
-                non_zero_elements++;
-            }
-
-            col->data[a_row] += result;
-        }
-
-    }
-
-    int elem = 0;
-    int itr;
-    for (itr = 0; itr < num_cols_a; itr++) {
-        if (col->data[itr] != 0) {
-            col->coords[elem] = col->coords[itr];
-            col->data[elem] = col->data[itr];
-            elem++;
-        }
-    }
-
-    col->NZ = non_zero_elements;
-    col->coords = (struct coord*)realloc(col->coords,non_zero_elements*sizeof(struct coord));
-    col->data = (double*)realloc(col->data,non_zero_elements*sizeof(double));
-    *col_res = col;
 }
 
 
@@ -651,16 +455,43 @@ static void calculate_result_col(int b_col, COO A, int *a_col_offsets, COO B, in
 static void perform_sparse_optimised_multi(const COO A, const COO B, COO *C) {
 
     const int a_num_rows = A->m;
+    const int b_num_cols = B->n;
+
+    #if SHOULD_PROFILE
+    LIKWID_MARKER_START("pre-process-multi");
+    #endif
+
+    /* if the output will have more columns than rows, calculate via distributed columns */
+    /* this will allow for better parellelisation */
+    /* we do this by transposing both matrices and then swapping them */
+    /* then, transpose result back at the end */
+    char COL_BASED_FRAGS; 
+    if (b_num_cols > a_num_rows) {
+        COL_BASED_FRAGS = 1;
+        swap_coos(&A,&B);
+        transpose_matrix(A);
+        transpose_matrix(B);
+    } else {
+        COL_BASED_FRAGS = 0;
+    }
+
+    order_coo_matrix_rows(A);
+    order_coo_matrix_rows(B);
+
+    #if SHOULD_PROFILE
+    LIKWID_MARKER_STOP("pre-process-multi");
+    #endif
 
     /* offsets to easily locate row indices */
     int *a_row_offsets = row_offset_table(A);
     int *b_row_offsets = row_offset_table(B);
 
-    COO *to_merge = (COO *)malloc(a_num_rows*sizeof(COO));
+    int num_fragments = (COL_BASED_FRAGS) ? b_num_cols : a_num_rows;
+    COO *to_merge = (COO *)malloc(num_fragments*sizeof(COO));
 
     COO row;
     int k;
-    for (k=0;k<a_num_rows;k++) {
+    for (k=0;k<num_fragments;k++) {
 //        printf("calculate row: %d\n", k);
         calculate_result_row(k,A,a_row_offsets,B,b_row_offsets,&row);
         to_merge[k] = row;
@@ -669,7 +500,10 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, COO *C) {
     /* merge the row results, to get the final matrix C! */
     merge_result_rows(A->m,A->m,B->n,to_merge,C);
 
-//    printf("COO RESULT: %p\n", C);
+    /* if we divided by cols, the result will be the transpose of what we expect */
+    if (COL_BASED_FRAGS) {
+        transpose_matrix(*C);
+    }
 
     /* we no longer need the offset tables */
     free(a_row_offsets);
@@ -705,26 +539,12 @@ void optimised_sparsemm(const COO A, const COO B, COO *C) {
         fprintf(stderr, "Invalid matrix sizes, got %d x %d and %d x %d\n", A->m, A->n, B->m, B->n);
         exit(1);
     }
-    
-
-    #if SHOULD_PROFILE
-    LIKWID_MARKER_START("pre-process-multi");
-    #endif
-
-    /* ensure COO files are ordered */
-    order_coo_matrix(A);
-    order_coo_matrix(B);
-
-    #if SHOULD_PROFILE
-    LIKWID_MARKER_STOP("pre-process-multi");
-    #endif
-
 
     #if SHOULD_PROFILE
     LIKWID_MARKER_START("optimised-multi");
     #endif
 
-    /* now multiply */
+    /* mutlipy! (any required ordering taken care of in function) */
     perform_sparse_optimised_multi(A, B, C);
 
     #if SHOULD_PROFILE
@@ -795,6 +615,8 @@ static void add_matrices(COO *A, COO B) {
         B = tmp;
     }
     
+    /* B must be ordered so we can quickly find it's elements! */
+    order_coo_matrix_rows(B);
     /* b row offset table for reference */
     int *b_row_offset_table = row_offset_table(B);
 
@@ -808,7 +630,7 @@ static void add_matrices(COO *A, COO B) {
         /* find matching entry in B, then add to A */
 //        printf("FINDING %d,%d in B\n",added->coords[k].i,added->coords[k].j);
         not_found_flag = 0;
-        val = locate_matching_entry(B,b_row_offset_table,added->coords[k],1,&not_found_flag);
+        val = locate_matching_entry_rows(B,b_row_offset_table,added->coords[k],1,&not_found_flag);
         /* flag will not have been modified if we have found a data val */
         if (not_found_flag == 0) {
             added->data[k] += val;
@@ -883,42 +705,33 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
     COO a_mut = A;
     COO *abc_added = &a_mut;
 
-//    printf("A to add:\n");
-//    print_sparse(A);
-
-    order_coo_matrix(B);
-//    printf("B to add:\n");
-//    print_sparse(B);
-    order_coo_matrix(C);
-//    printf("C to add:\n");
-//    print_sparse(C);
-
     printf("Adding A+B\n");
     add_matrices(abc_added,B);
     printf("Adding A+C\n");
     add_matrices(abc_added,C);
-
-    order_coo_matrix(*abc_added);
     printf("ADDED A,B,C :):\n");
-//    print_sparse(*abc_added);
-
 
     /* CREATE MULT MATRIX D */
     COO d_mut = D;
     COO *def_added = &d_mut;
 
-    order_coo_matrix(E);
-    order_coo_matrix(F);
     printf("Adding D+E\n");
     add_matrices(def_added,E);
     printf("Adding D+F\n");
     add_matrices(def_added,F);
 
+    #if SHOULD_PROFILE
+    LIKWID_MARKER_STOP("optimised-sum-add");
+    #endif
+
     printf("ADDED D,E,F :):\n");
-    order_coo_matrix(*def_added);
 
     // ensure there is no value currently stored at O
     *O = NULL;
+
+    #if SHOULD_PROFILE
+    LIKWID_MARKER_START("optimised-sum-multiply");
+    #endif
 
     // perform the optimised matrix multiplication operation
     printf("multiplying A*D...\n");
@@ -926,7 +739,7 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
     printf("mult done!\n");
 
     #if SHOULD_PROFILE
-    LIKWID_MARKER_STOP("optimised-sum-add");
+    LIKWID_MARKER_STOP("optimised-sum-multiply");
     LIKWID_MARKER_CLOSE;
     #endif
 
