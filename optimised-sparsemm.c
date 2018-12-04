@@ -225,68 +225,68 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
     /* final should point to result when we are done */
     *final = NULL;
 
-    /* result is just the first entry (we will append other items to this) */
-    COO result = coo_list[0];
+    /* result will be the first entry in the matrix (we will append other items to this) */
+    COO result;
 
-    /* length of the first row, because we will lose this information when we realloc to fit all values */
-    const int first_len = result->NZ;
+    /* memory offsets so we know where to memcpy from */
+    int memory_offsets[num_rows];
+    int total_rows = 0;
+    int total_items = 0;
+    int a;
+    COO coo;
+    for (a=0;a<num_rows;a++) {
+        coo = coo_list[a];
+        if (coo == NULL) {
+            /* if this row does not exist, there is no offset */
+            memory_offsets[a] = -1;
+        } else {
+            /* if this is the first row we have encountered, it will be the one we append everything to */
+            if (total_rows == 0) result = coo;
+            /* update memory offset for this row */
+            memory_offsets[a] = total_items;
+            total_items += coo->NZ;
+            total_rows++;
+        }
+    }
+
 
     /* allocate all the memory that we will need (so we pay less of a performance cost later)
      * rather than reallocating the memory to fit for each row that we add, we allocate it all right here and now! */
-    int total_items = 0;
-    int k;
-#pragma acc kernels
-    for (k=0; k<num_rows; k++) {
-        COO coo = coo_list[k];
-        /* null list just means there are no values for this row! */
-        if (coo == NULL)
-            continue;
-        total_items += coo->NZ;
-    }
     result->coords = (struct coord*)realloc(result->coords,total_items*sizeof(struct coord));
     result->data = (double *)realloc(result->data,total_items*sizeof(double));
     result->NZ = total_items;
     result->m = m;
     result->n = n;
 
+    // printf("-----> result before merge <--- \n");
+    // print_sparse(result);
 
 
     struct coord *coord_ptr;
     double *data_ptr;
-    int i;
-    int current_mem_offset = 0x0;
-    /* this needs to be executed serially */
-    for (i = 1; i<num_rows; i++) {
-        COO coo = coo_list[i];
-        if (coo == NULL) // no list here
+    int i, mem_offset;
+    #pragma acc kernels
+    for (i = 0; i<num_rows; i++) {
+        coo = coo_list[i];
+        /* if there is no offset (-1), there is no row */
+        /* if row is 0, this is the first row, and it's result is already in the result! */
+        mem_offset = memory_offsets[i];
+        if (mem_offset <= 0)
             continue;
 
-        /* offset to place value at */
-        if (i-1 == 0) {
-            current_mem_offset += first_len;
-        } else {
-            current_mem_offset += coo_list[i-1]->NZ;
-        }
-
-//        printf(" ------ MERGING: %d ----- \n", i);
-//        printf("NON-ZEROS: %d\n",coo->NZ);
-//        printf("OFFSET: %d\n",current_mem_offset);
-        
-        /* copy coordinates and data into the result to combine them */
-        coord_ptr = (result->coords)+current_mem_offset;
-//        printf("coord pointer: %p\n",coord_ptr);
+        /* add coordinates and data to the end of the current list */
+        coord_ptr = (result->coords)+mem_offset;
+        data_ptr = (result->data)+mem_offset;
         memcpy(coord_ptr,coo->coords,coo->NZ*sizeof(struct coord));
-        data_ptr = (result->data)+current_mem_offset;
-//        printf("data pointer: %p\n", data_ptr);
         memcpy(data_ptr,coo->data,coo->NZ*sizeof(double));
 
-//        printf("merged so far:\n");
-//        print_sparse(result);
+        // printf("-----> merged %d <--- \n", i);
+        // print_sparse(result);
 
         /* free the old, unneeded old list (it is now in `result` so we need it no longer) */
         free(coo->coords);
         free(coo->data);
-        
+        free(coo);
     }
 
 //    printf(" --- RESULT MATRIX ---:\n");

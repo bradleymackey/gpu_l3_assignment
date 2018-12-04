@@ -9,10 +9,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d3a73caa-c3f2-4145-b6d4-ba4942498c80" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sparsemm.dSYM/Contents/Resources/DWARF/sparsemm" beforeDir="false" afterPath="$PROJECT_DIR$/sparsemm.dSYM/Contents/Resources/DWARF/sparsemm" afterDir="false" />
-    </list>
+    <list default="true" id="d3a73caa-c3f2-4145-b6d4-ba4942498c80" name="Default Changelist" comment="" />
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -25,8 +22,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/optimised-sparsemm.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="356">
-              <caret line="679" column="18" selection-start-line="679" selection-start-column="18" selection-end-line="679" selection-end-column="18" />
+            <state relative-caret-position="127">
+              <caret line="407" column="34" lean-forward="true" selection-start-line="407" selection-start-column="34" selection-end-line="407" selection-end-column="34" />
               <folding>
                 <element signature="e#125#144#0" expanded="true" />
                 <element signature="e#20728#20747#0" expanded="true" />
@@ -138,18 +135,17 @@
       <option name="presentableId" value="Default" />
       <updated>1543767195521</updated>
       <workItem from="1543767197573" duration="40456000" />
-      <workItem from="1543928505063" duration="5138000" />
+      <workItem from="1543928505063" duration="5299000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="45594000" />
+    <option name="totallyTimeSpent" value="45755000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="911" height="1050" extended-state="6" />
-    <editor active="true" />
+    <frame x="0" y="0" width="1180" height="1050" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.28423476" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.16871704" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -262,8 +258,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/optimised-sparsemm.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="356">
-          <caret line="679" column="18" selection-start-line="679" selection-start-column="18" selection-end-line="679" selection-end-column="18" />
+        <state relative-caret-position="127">
+          <caret line="407" column="34" lean-forward="true" selection-start-line="407" selection-start-column="34" selection-end-line="407" selection-end-column="34" />
           <folding>
             <element signature="e#125#144#0" expanded="true" />
             <element signature="e#20728#20747#0" expanded="true" />
