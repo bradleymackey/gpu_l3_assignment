@@ -11,8 +11,6 @@
   <component name="ChangeListManager">
     <list default="true" id="d3a73caa-c3f2-4145-b6d4-ba4942498c80" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/basic-sparsemm.c" beforeDir="false" afterPath="$PROJECT_DIR$/basic-sparsemm.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/optimised-sparsemm.c" beforeDir="false" afterPath="$PROJECT_DIR$/optimised-sparsemm.c" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sparsemm.dSYM/Contents/Resources/DWARF/sparsemm" beforeDir="false" afterPath="$PROJECT_DIR$/sparsemm.dSYM/Contents/Resources/DWARF/sparsemm" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
@@ -24,28 +22,16 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/optimised-sparsemm.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="561">
-              <caret line="381" selection-start-line="381" selection-end-line="381" />
+            <state relative-caret-position="187">
+              <caret line="611" column="15" lean-forward="true" selection-start-line="611" selection-start-column="15" selection-end-line="611" selection-end-column="15" />
               <folding>
                 <element signature="e#125#144#0" expanded="true" />
-                <element signature="e#20909#20928#0" expanded="true" />
-                <element signature="e#21987#22028#0" expanded="true" />
-                <element signature="e#23152#23217#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/check-sum.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="289">
-              <caret line="17" column="50" lean-forward="true" selection-start-line="17" selection-start-column="50" selection-end-line="17" selection-end-column="50" />
-              <folding>
-                <element signature="e#0#12#0" expanded="true" />
+                <element signature="e#20728#20747#0" expanded="true" />
+                <element signature="e#21806#21847#0" expanded="true" />
+                <element signature="e#22971#23036#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -96,6 +82,7 @@
       <list>
         <option value="$PROJECT_DIR$/test.tst" />
         <option value="$PROJECT_DIR$/basic-sparsemm.c" />
+        <option value="$PROJECT_DIR$/convert-to-binary.py" />
         <option value="$PROJECT_DIR$/optimised-sparsemm.c" />
       </list>
     </option>
@@ -151,18 +138,18 @@
       <option name="presentableId" value="Default" />
       <updated>1543767195521</updated>
       <workItem from="1543767197573" duration="40456000" />
-      <workItem from="1543928505063" duration="2981000" />
+      <workItem from="1543928505063" duration="4215000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="43437000" />
+    <option name="totallyTimeSpent" value="44671000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="0" width="1016" height="1050" extended-state="6" />
+    <frame x="0" y="0" width="926" height="1050" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25359342" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.27941176" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -246,16 +233,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/convert-to-binary.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="306">
-          <caret line="18" selection-start-line="18" selection-end-line="18" />
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/sparsemm.c">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="457">
@@ -263,25 +240,35 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/optimised-sparsemm.c">
+    <entry file="file://$PROJECT_DIR$/check-sum.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="561">
-          <caret line="381" selection-start-line="381" selection-end-line="381" />
+        <state relative-caret-position="493">
+          <caret line="29" column="18" selection-start-line="29" selection-start-column="18" selection-end-line="29" selection-end-column="18" />
           <folding>
-            <element signature="e#125#144#0" expanded="true" />
-            <element signature="e#20909#20928#0" expanded="true" />
-            <element signature="e#21987#22028#0" expanded="true" />
-            <element signature="e#23152#23217#0" expanded="true" />
+            <element signature="e#0#12#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/check-sum.py">
+    <entry file="file://$PROJECT_DIR$/convert-to-binary.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="17" column="50" lean-forward="true" selection-start-line="17" selection-start-column="50" selection-end-line="17" selection-end-column="50" />
+        <state relative-caret-position="408">
+          <caret line="24" lean-forward="true" selection-start-line="24" selection-end-line="24" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/optimised-sparsemm.c">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="187">
+          <caret line="611" column="15" lean-forward="true" selection-start-line="611" selection-start-column="15" selection-end-line="611" selection-end-column="15" />
+          <folding>
+            <element signature="e#125#144#0" expanded="true" />
+            <element signature="e#20728#20747#0" expanded="true" />
+            <element signature="e#21806#21847#0" expanded="true" />
+            <element signature="e#22971#23036#0" expanded="true" />
           </folding>
         </state>
       </provider>
