@@ -52,6 +52,7 @@ static int compare_coo_order_cols(const void *v1, const void *v2) {
 static void order_coo_matrix(COO M) {
     
     /* an array that contains pointers to coordinates, these are sorted as a layer of indirection */
+    // TODO: sort on the stack if at all possible? -> so much faster (SO for large COOs)
     struct coord **pointer_arr = (struct coord**)malloc(M->NZ*sizeof(struct coord*));
     //struct coord *pointer_arr[M->NZ];
     
@@ -329,6 +330,8 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
     /* iterate over elements of A in the specified row */
     int b_row, a_col, b_col; // track real row and col positions in the would-be full matrix
     int a_itr, b_itr; // itr variables keep track of positions in the COO files
+    int b_row_offset;
+    double result;
     /* loop will overshoot, break when needed */
     for (a_itr = 0; a_itr < num_cols_a; a_itr++) {
 
@@ -346,7 +349,7 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
         a_col = A->coords[a_row_offset + a_itr].j;
 
         /* find row of B that corresponds to this column of A */
-        int b_row_offset = b_row_offsets[a_col];
+        b_row_offset = b_row_offsets[a_col];
         /* if row does not exist, jump to next A column */
         if (b_row_offset == -1)
             continue;
@@ -372,8 +375,7 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
             row->coords[b_col].i = a_row;
             row->coords[b_col].j = b_col;
 
-
-            double result = A->data[a_row_offset + a_itr] * B->data[b_row_offset + b_itr];
+            result = A->data[a_row_offset + a_itr] * B->data[b_row_offset + b_itr];
 
 
             /* if this is the first value for this column, increment non-zeros! */
@@ -499,14 +501,12 @@ void optimised_sparsemm(const COO A, const COO B, COO *C) {
     /* now multiply */
     perform_sparse_optimised_multi(A, B, C);
 
-
     #if SHOULD_PROFILE
     LIKWID_MARKER_STOP("optimised-multi");
     LIKWID_MARKER_CLOSE;
     #endif
     
     //return basic_sparsemm(A,B,C);
-    
 }
 
 

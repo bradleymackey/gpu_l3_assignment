@@ -43,3 +43,4 @@ if rnorm < 1e-6:
     print("ok")
 else:
     print("fail")
+    print("the rnorm was",rnorm)
