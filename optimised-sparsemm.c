@@ -374,10 +374,12 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
 
             double result = A->data[a_row_offset + a_itr] * B->data[b_row_offset + b_itr];
 
+
             /* if this is the first value for this column, increment non-zeros! */
             if (result != 0.0 && row->data[b_col] == 0.0) {
                 non_zero_elements++;
             }
+
 
 //            printf("%d,%d adding %.2f\n", a_row, b_col, result);
 //            printf("   -> A cell was %.2f\n", A->data[a_row_offset + a_itr]);
@@ -392,7 +394,7 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
     int elem = 0;
     int itr;
     for (itr = 0; itr < num_cols_a; itr++) {
-        if (row->data[itr] != 0.0) {
+        if (row->data[itr] != 0) {
             row->coords[elem] = row->coords[itr];
             row->data[elem] = row->data[itr];
             elem++;
@@ -542,10 +544,6 @@ static void merge_matrices(COO *A, COO B, int b_uniques) {
         }
     }
 
-
-//    printf("FULLY ADDED MERGED\n");
-//    print_sparse(added);
-
     *A = added;
     
 }
@@ -650,7 +648,6 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
         exit(1);
     }
 
-
     #if SHOULD_PROFILE
     LIKWID_MARKER_START("optimised-sum-add");
     #endif
@@ -701,12 +698,10 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
     perform_sparse_optimised_multi(*abc_added, *def_added, O);
     printf("mult done!\n");
 
-
     #if SHOULD_PROFILE
     LIKWID_MARKER_STOP("optimised-sum-add");
     LIKWID_MARKER_CLOSE;
     #endif
-
 
 //    return basic_sparsemm_sum(A, B, C, D, E, F, O);
 }
