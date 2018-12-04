@@ -9,6 +9,12 @@
 #include <likwid.h>
 #endif
 
+/*
+ * FOR ALL OPERATIONS:
+ * 0 = row
+ * 1 = col
+ */
+
 
 // use `likwid` on Hamilton in order to measure performance of the routines
 
@@ -49,6 +55,7 @@ static int compare_coo_order_cols(const void *v1, const void *v2) {
  * time complexity: O(nlogn)
  * space complexity: O(n)
  */
+// 
 static void order_coo_matrix(COO M) {
     
     /* an array that contains pointers to coordinates, these are sorted as a layer of indirection */
@@ -234,23 +241,23 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
     int memory_offsets[num_rows];
     int total_rows = 0;
     int total_items = 0;
-    int a;
+    int i;
     COO coo;
-    for (a=0;a<num_rows;a++) {
-        coo = coo_list[a];
+    /* must be executed sequentially due to depencies on prior offsets */
+    for (i=0;i<num_rows;i++) {
+        coo = coo_list[i];
         if (coo == NULL) {
             /* if this row does not exist, there is no offset */
-            memory_offsets[a] = -1;
+            memory_offsets[i] = -1;
         } else {
             /* if this is the first row we have encountered, it will be the one we append everything to */
             if (total_rows == 0) result = coo;
             /* update memory offset for this row */
-            memory_offsets[a] = total_items;
+            memory_offsets[i] = total_items;
             total_items += coo->NZ;
             total_rows++;
         }
     }
-
 
     /* allocate all the memory that we will need (so we pay less of a performance cost later)
      * rather than reallocating the memory to fit for each row that we add, we allocate it all right here and now! */
@@ -266,10 +273,9 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
 
     struct coord *coord_ptr;
     double *data_ptr;
-    int i, mem_offset;
+    int mem_offset;
     #pragma acc kernels
     for (i = 0; i<num_rows; i++) {
-        coo = coo_list[i];
         /* if there is no offset (-1), there is no row */
         /* if row is 0, this is the first row, and it's result is already in the result! */
         mem_offset = memory_offsets[i];
@@ -279,6 +285,7 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
         /* add coordinates and data to the end of the current list */
         coord_ptr = (result->coords)+mem_offset;
         data_ptr = (result->data)+mem_offset;
+        coo = coo_list[i];
         memcpy(coord_ptr,coo->coords,coo->NZ*sizeof(struct coord));
         memcpy(data_ptr,coo->data,coo->NZ*sizeof(double));
 
