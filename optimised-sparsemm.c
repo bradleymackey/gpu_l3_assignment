@@ -53,6 +53,7 @@ static void order_coo_matrix(COO M) {
     
     /* an array that contains pointers to coordinates, these are sorted as a layer of indirection */
     struct coord **pointer_arr = (struct coord**)malloc(M->NZ*sizeof(struct coord*));
+    //struct coord *pointer_arr[M->NZ];
     
     /* create array of pointers to coords[] */
     int i;
@@ -86,7 +87,7 @@ static void order_coo_matrix(COO M) {
     }
     
     /* pointer array no longer needed */
-    free(pointer_arr);
+   free(pointer_arr);
 
 }
 
