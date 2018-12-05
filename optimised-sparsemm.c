@@ -87,6 +87,7 @@ static void order_coo_matrix_rows(COO M) {
     /* create array of pointers to coords[] */
     int i;
     #pragma acc kernels
+    #pragma unroll (4)
     for(i = 0; i < M->NZ; i++)
         pointer_arr[i] = &(M->coords[i]);
     
@@ -195,7 +196,8 @@ static int *row_offset_table(const COO M) {
     prev_row = -1;
     
     int k, backfill;
-    #pragma acc kernels
+    /* must be executed serially due to offset calc */
+    #pragma nounroll
     for (k = 0; k < M->NZ; k++) {
 
         // the row number for this coordinate
@@ -227,6 +229,7 @@ static int *row_offset_table(const COO M) {
     // (because there are no cells in the matrix), with -1s
     int i;
     #pragma acc kernels
+    #pragma unroll (4)
     for (i = curr_row+1; i < num_rows; i++) {
         result[i] = -1;
     }
@@ -410,6 +413,7 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
     int elem = 0;
     int itr;
     /* must be serial, depends on elem */
+    #pragma nounroll
     for (itr = 0; itr < num_cols_a; itr++) {
         if (row->data[itr] != 0) {
             row->coords[elem] = row->coords[itr];
@@ -589,7 +593,7 @@ static void merge_matrices(COO *A, COO B, int b_uniques) {
     // iterate over B and append all the entries to A
     int k,j;
     j = old_a_size;
-    #pragma acc kernels // ---> not sure if this can be vectorised because of dependcy on `j`?
+    #pragma nounroll
     for (k = 0; k < B->NZ; k++) {
         // do not append if column is 0 - this value has already been added to A
         if (B->data[k] != 0.0) {
