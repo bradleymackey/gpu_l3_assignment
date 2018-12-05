@@ -364,6 +364,7 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
 
 
         /* loop will overshoot, break when end of row is reached */
+        #pragma vector always
         for (b_itr = 0; b_itr < B->n; b_itr++) {
 
             /* check we are not shooting past the memory of the B COO */
