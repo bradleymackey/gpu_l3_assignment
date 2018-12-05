@@ -301,6 +301,9 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
         memcpy(coord_ptr,coo->coords,coo->NZ*sizeof(struct coord));
         memcpy(data_ptr,coo->data,coo->NZ*sizeof(double));
 
+        // printf("-----> merged at round %d <--- \n",i);
+        // print_sparse(result);
+
         /* free the old, unneeded old list (it is now in `result` so we need it no longer) */
         free_sparse(&coo);
     }
@@ -480,7 +483,7 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, COO *C) {
     /* fortunatley, swap very, very quick and the transpose can be very easily parallelised! */
     char COL_BASED_FRAGS = 0; 
     if (b_num_cols > a_num_rows) {
-        printf("dividing by col!!!\n");
+        // printf("dividing by col!!!\n");
         COL_BASED_FRAGS = 1;
         swap_coos(&A,&B);
         transpose_coo_matrix(&A);
@@ -641,15 +644,14 @@ static void add_matrices(COO *A, COO B) {
     /* iterate over each line of A, to see if we can find B vals that correspond */
     /* we know that we iterate over each line of A in order, sorted by ROW, COL, so we can use this to narrow down the bsearch as we go */
     for (k = 0; k < added->NZ; k++) {
+        not_found_flag = 0; // reset the flag
         /* find matching entry in B, then add to A */
         /* forceinline so we can vectorise loop */
-        #pragma forceinline recursive
         val = locate_matching_entry_rows(B,b_row_offset_table,added->coords[k],1,&not_found_flag);
         /* flag will not have been modified if we have found a data val */
         if (not_found_flag == 0) {
             added->data[k] += val;
             b_non_uniques++;
-            not_found_flag = 0;
         }
     }
 
@@ -720,26 +722,45 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
     COO a_mut = A;
     COO *abc_added = &a_mut;
 
-    printf("Adding A+B\n");
+    // printf("Adding A+B\n");
+    // printf("---> A (%d)\n", (*abc_added)->NZ);
+    // print_sparse(*abc_added);
+    // printf("---> B (%d)\n", B->NZ);
+    // print_sparse(B);
     add_matrices(abc_added,B);
-    printf("Adding A+C\n");
+    // printf("Adding A+C\n");
+    // printf("---> A\n");
+    // print_sparse(*abc_added);
+    // printf("---> C\n");
+    // print_sparse(C);
     add_matrices(abc_added,C);
-    printf("ADDED A,B,C :):\n");
+    // printf("ADDED A,B,C :):\n");
+    // print_sparse(*abc_added);
 
     /* CREATE MULT MATRIX D */
     COO d_mut = D;
     COO *def_added = &d_mut;
 
-    printf("Adding D+E\n");
+    // printf("Adding D+E\n");
+    // printf("---> D\n");
+    // print_sparse(*def_added);
+    // printf("---> E\n");
+    // print_sparse(E);
     add_matrices(def_added,E);
-    printf("Adding D+F\n");
+    // printf("Adding D+F\n");
+    // printf("---> D\n");
+    // print_sparse(*def_added);
+    // printf("---> F\n");
+    // print_sparse(F);
     add_matrices(def_added,F);
+    // printf("ADDED D,E,F :):\n");
+    // print_sparse(*def_added);
 
     #if SHOULD_PROFILE
     LIKWID_MARKER_STOP("optimised-sum-add");
     #endif
 
-    printf("ADDED D,E,F :):\n");
+    
 
     // ensure there is no value currently stored at O
     *O = NULL;
