@@ -37,6 +37,7 @@ static void transpose_matrix(const COO *M) {
 
     /* transpose coordinate values */
     /* data values stay put, because this is a transpose after all! */
+    /* can be parallelised */
     int i;
     #pragma acc kernels
     for (i = 0; i<(*M)->NZ; i++) {
@@ -138,7 +139,7 @@ static double locate_matching_entry_rows(COO M, int *row_offset_table, struct co
     const int num_rows = M->m;
     int row_offset_end = -1;
     int k; // the last offset to check (so we know what range the row takes up)
-    #pragma acc kernels // ---> we need a way to break out once one thread has found it, or this may be slow
+    /* must be serial */
     for (k = (to_find.i+1); k < num_rows; k++) {
         row_offset_end = row_offset_table[k];
         // if not -1 we have found an offset where we should step function
@@ -285,6 +286,7 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
     struct coord *coord_ptr;
     double *data_ptr;
     int mem_offset;
+    /* all rows can be merged parallel, as they are all copied to distinct memory locations */
     #pragma acc kernels
     for (i = 0; i<num_rows; i++) {
         /* if there is no offset (-1), there is no row */
@@ -347,9 +349,8 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
     int b_row_offset;
     double result, prev_val;
     /* loop will overshoot, break when needed */
+    #pragma acc kernels
     for (a_itr = 0; a_itr < num_cols_a; a_itr++) {
-
-        // printf("A ITR: %d\n", a_itr);
 
         /* check we are not shooting past the memory of the A COO */
         if (a_row_offset + a_itr >= A->NZ)
@@ -407,6 +408,7 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
     /* this allows us to free all the empty space taken up by the 0 cells */
     int elem = 0;
     int itr;
+    /* must be serial, depends on elem */
     for (itr = 0; itr < num_cols_a; itr++) {
         if (row->data[itr] != 0) {
             row->coords[elem] = row->coords[itr];
@@ -415,18 +417,12 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
         }
     }
 
-//    printf("    ------->  ROW %d (before) <---------\n", a_row);
-//    print_sparse(row);
-
     /* strip the row down to keep only the memory we need (hopefully much smaller than before if very sparse!) */
     /* this works because all of the values we need have now been pushed to the top of the array, essentially 'squeezing out' the 0s */
     row->NZ = non_zero_elements;
     row->coords = (struct coord*)realloc(row->coords,non_zero_elements*sizeof(struct coord));
     row->data = (double*)realloc(row->data,non_zero_elements*sizeof(double));
     *row_res = row;
-
-//    printf("    ------->  ROW %d (after) <---------\n", a_row);
-//    print_sparse(row);
 
 }
 
@@ -457,8 +453,9 @@ static void swap_coos(const COO *A, const COO *B) {
 }
 
 
-/* performs the sparse matrix multiplication
- */
+/* performs sparse multiplication */
+/* handles any required sorting, swapping, pre-processing etc. */
+/* just pass matricies of __valid sizes__ and let's go! */
 static void perform_sparse_optimised_multi(const COO A, const COO B, COO *C) {
 
     const int a_num_rows = A->m;
@@ -472,7 +469,8 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, COO *C) {
     /* this will allow for better parellelisation for this matrix */
     /* we do this by transposing both matrices and then swapping them */
     /* then, transpose result back at the end */
-    /* this allows us to use the same `row fragmenation` code, but calculating a column at a time instead */
+    /* this allows us to use the same `row fragmenation` code, but calculating the result a column at a time (instead of a row at a time) */
+    /* this is designed to allow flatter matricies to also experience the same awesome parallelisation speedups */
     /* only downside is the time required for swapping and transposing */
     /* fortunatley, swap very, very quick and the transpose can be very easily parallelised! */
     char COL_BASED_FRAGS = 0; 
@@ -500,8 +498,9 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, COO *C) {
 
     COO row;
     int k;
+    // THIS is where the ultimate parallelisation payoff comes in!
+    #pragma acc kernels
     for (k=0;k<num_fragments;k++) {
-//        printf("calculate row: %d\n", k);
         calculate_result_row(k,A,a_row_offsets,B,b_row_offsets,&row);
         to_merge[k] = row;
     }
@@ -553,7 +552,7 @@ void optimised_sparsemm(const COO A, const COO B, COO *C) {
     LIKWID_MARKER_START("optimised-multi");
     #endif
 
-    /* mutlipy! (any required ordering taken care of in function) */
+    /* just multiply! */
     perform_sparse_optimised_multi(A, B, C);
 
     #if SHOULD_PROFILE
