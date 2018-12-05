@@ -197,17 +197,14 @@ static int *row_offset_table(const COO M) {
     int k, backfill;
     #pragma acc kernels
     for (k = 0; k < M->NZ; k++) {
-        
+
         // the row number for this coordinate
         curr_row = M->coords[k].i;
-
-//        printf("k: %d, curr_row: %d, prev_row: %d\n", k, curr_row, prev_row);
         
         // if we have not marked the start of this row already...
         if (curr_row != prev_row) {
 
             // mark the index of where this row starts
-//            printf("SET %d to %d\n",curr_row, k);
             result[curr_row] = k;
 
             // perform backfill of -1 values if this is not the immediate next index
@@ -217,7 +214,6 @@ static int *row_offset_table(const COO M) {
             // update difference with how many mem cells we should backfill with -1s
             int d;
             for (d = 1; d <= backfill; d++) {
-//                printf("SET %d to -1\n", curr_row - d);
                 result[curr_row - d] = -1;
             }
 
@@ -250,7 +246,7 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
     COO result;
 
     /* memory offsets so we know what offset to memcpy to */
-    int memory_offsets[num_rows];
+    int *memory_offsets = (int*)malloc(num_rows*sizeof(int));
     int total_rows = 0;
     int total_items = 0;
     int i;
@@ -302,14 +298,11 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
         memcpy(coord_ptr,coo->coords,coo->NZ*sizeof(struct coord));
         memcpy(data_ptr,coo->data,coo->NZ*sizeof(double));
 
-        // printf("-----> merged %d <--- \n", i);
-        // print_sparse(result);
-
         /* free the old, unneeded old list (it is now in `result` so we need it no longer) */
-        free(coo->coords);
-        free(coo->data);
-        free(coo);
+        free_sparse(&coo);
     }
+
+    free(memory_offsets);
 
 //    printf(" --- RESULT MATRIX ---:\n");
 //    print_sparse(result);
@@ -402,6 +395,13 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
             row->data[b_col] = prev_val + result;
         }
 
+    }
+
+    /* if there are no elements in the row, free what we started with and set value to NULL */
+    if (non_zero_elements == 0) {
+        free_sparse(&row);
+        *row_res = NULL;
+        return;
     }
 
     /* arrange all elements so they maintain their order but are compressed to the top of the row */
@@ -523,7 +523,6 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, COO *C) {
 
 /* Computes C = A*B.
  * C should be allocated by this routine.
- *
  */
 void optimised_sparsemm(const COO A, const COO B, COO *C) {
     
@@ -637,6 +636,8 @@ static void add_matrices(COO *A, COO B) {
     /* we know that we iterate over each line of A in order, sorted by ROW, COL, so we can use this to narrow down the bsearch as we go */
     for (k = 0; k < added->NZ; k++) {
         /* find matching entry in B, then add to A */
+        /* forceinline so we can vectorise loop */
+        #pragma forceinline recursive
         val = locate_matching_entry_rows(B,b_row_offset_table,added->coords[k],1,&not_found_flag);
         /* flag will not have been modified if we have found a data val */
         if (not_found_flag == 0) {
