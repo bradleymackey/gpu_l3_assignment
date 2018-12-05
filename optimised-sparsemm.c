@@ -27,7 +27,7 @@ void basic_sparsemm_sum(const COO, const COO, const COO,
 
 
 /* transposes any COO (does not have to be ordered or anything) */
-static void transpose_matrix(const COO *M) {
+static void transpose_coo_matrix(const COO *M) {
 
     /* transpose header */
     int tmp;
@@ -483,8 +483,8 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, COO *C) {
         printf("dividing by col!!!\n");
         COL_BASED_FRAGS = 1;
         swap_coos(&A,&B);
-        transpose_matrix(&A);
-        transpose_matrix(&B);
+        transpose_coo_matrix(&A);
+        transpose_coo_matrix(&B);
     }
 
     order_coo_matrix_rows(A);
@@ -515,7 +515,7 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, COO *C) {
 
     /* if we divided by cols, the result will be the transpose of what we expect */
     if (COL_BASED_FRAGS) {
-        transpose_matrix(C);
+        transpose_coo_matrix(C);
     }
 
     /* we no longer need the offset tables */
@@ -636,6 +636,7 @@ static void add_matrices(COO *A, COO B) {
     int b_non_uniques = 0; // the number of elements of B for which there is a matching element in A
     char not_found_flag = 0;
     double val;
+    /* KEY PERFORMANCE IMPROVEMENTS VIA PARALLEL HERE */
     #pragma acc kernels
     /* iterate over each line of A, to see if we can find B vals that correspond */
     /* we know that we iterate over each line of A in order, sorted by ROW, COL, so we can use this to narrow down the bsearch as we go */
