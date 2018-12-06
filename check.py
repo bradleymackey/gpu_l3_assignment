@@ -30,13 +30,19 @@ def read_matrix(filename):
     return scipy.sparse.coo_matrix((v, tuple(coords.T)), shape=(m, n))
 
 
+print("multiply check READ start")
 A, B = map(read_matrix, args.matrices)
+print("multiply check READ stop")
 
 actual = read_matrix(args.actual)
 
+
+print("multiply check start")
 expect = numpy.dot(A, B)
+print("multiply check stop")
 
 diff = expect - actual
+print(diff)
 rnorm = scipy.sparse.linalg.norm(diff) / scipy.sparse.linalg.norm(expect)
 
 if rnorm < 1e-6:

@@ -559,8 +559,12 @@ void optimised_sparsemm(const COO A, const COO B, COO *C) {
     LIKWID_MARKER_START("optimised-multi");
     #endif
 
+    printf("MULTIPLY OPT START\n");
+
     /* just multiply! */
     perform_sparse_optimised_multi(A, B, C);
+
+    printf("MULTIPLY OPT STOP\n");
 
     #if SHOULD_PROFILE
     LIKWID_MARKER_STOP("optimised-multi");
