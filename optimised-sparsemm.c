@@ -316,6 +316,44 @@ static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *fi
 
 }
 
+/* THIS IS CURRENTLY THE BOTTLENECK FOR THE ENTIRE THING! SPEED THIS UP! */
+// to speed up -> make it so we need to compress way less elements (estimate the number of rows required, realloc when full (use modulo to map to the quasi memory cells maybe?))
+static void compress_elements(COO *row, int num_cols, int non_zeros) {
+
+    /* arrange all elements so they maintain their order but are compressed to the top of the row */
+    /* this allows us to free all the empty space taken up by the 0 cells */
+    int elem = 0;
+    int itr;
+
+    struct coord *compressed_coords = (struct coord*)malloc(non_zeros*sizeof(struct coord));
+    double *compressed_data = (double*)malloc(non_zeros*sizeof(double));
+    int *mappings = (int*)malloc(num_cols*sizeof(int));
+
+    /* must be serial, depends on elem */
+    for (itr = 0; itr < num_cols; itr++) {
+        if ((*row)->data[itr] != 0) {
+            mappings[itr] = elem;
+            elem++;
+        } else {
+            mappings[itr] = -1;
+        }
+    }
+
+    #pragma acc kernels
+    for (itr = 0; itr < num_cols; itr++) {
+        if (mappings[itr] == -1)
+            continue;
+        compressed_coords[mappings[itr]] = (*row)->coords[itr];
+        compressed_data[mappings[itr]] = (*row)->data[itr];
+    }
+
+    (*row)->NZ = non_zeros;
+    (*row)->coords = compressed_coords;
+    (*row)->data = compressed_data;
+
+    free((*row)->coords);
+    free((*row)->data);
+}
 
 /* calculates a result row in the resultant matrix 
    - row_res will allocated by this routine */
@@ -411,25 +449,8 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
         return;
     }
 
-    /* arrange all elements so they maintain their order but are compressed to the top of the row */
-    /* this allows us to free all the empty space taken up by the 0 cells */
-    int elem = 0;
-    int itr;
-    /* must be serial, depends on elem */
-    #pragma nounroll
-    for (itr = 0; itr < num_cols_a; itr++) {
-        if (row->data[itr] != 0) {
-            row->coords[elem] = row->coords[itr];
-            row->data[elem] = row->data[itr];
-            elem++;
-        }
-    }
+    compress_elements(&row, num_cols_a, non_zero_elements);
 
-    /* strip the row down to keep only the memory we need (hopefully much smaller than before if very sparse!) */
-    /* this works because all of the values we need have now been pushed to the top of the array, essentially 'squeezing out' the 0s */
-    row->NZ = non_zero_elements;
-    row->coords = (struct coord*)realloc(row->coords,non_zero_elements*sizeof(struct coord));
-    row->data = (double*)realloc(row->data,non_zero_elements*sizeof(double));
     *row_res = row;
 
 }
