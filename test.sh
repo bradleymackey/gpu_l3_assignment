@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MATRIX_DIR="./matrix/small"
+MATRIX_DIR="./matrix/big"
 
 tmp_file_name="OUT_tmp.bm"
 matrix_ext=".matrix"
@@ -58,6 +58,7 @@ do
 		then
 			echo "MULT $entry1 $entry2"
 		  ./sparsemm --binary $tmp_file_name $entry1 $entry2
+		  echo "CHECKING..."
 		  python3 check.py $entry1 $entry2 $tmp_file_name
 		fi
 
@@ -105,6 +106,7 @@ do
 		then
 			echo "MULT ($entry1 + $entry2 + $entry1) ($entry2 + $entry1 + $entry2)"
 		  ./sparsemm --binary $tmp_file_name $entry1 $entry2 $entry1 $entry2 $entry1 $entry2
+		  echo "CHECKING..."
 		  python3 check-sum.py $entry1 $entry2 $entry1 $entry2 $entry1 $entry2 $tmp_file_name
 		fi
 
