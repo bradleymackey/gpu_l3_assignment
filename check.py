@@ -46,7 +46,6 @@ print(diff)
 rnorm = scipy.sparse.linalg.norm(diff) / scipy.sparse.linalg.norm(expect)
 
 if rnorm < 1e-6:
-    print("ok")
+    print("ok: ||E - A|| / ||E|| = {}".format(rnorm))
 else:
-    print("fail")
-print("the rnorm was",rnorm)
+    print("fail: ||E - A|| / ||E|| = {}".format(rnorm))
