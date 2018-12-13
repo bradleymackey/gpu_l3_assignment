@@ -45,13 +45,15 @@ void add_hash_int(struct hash_int *hash_table, int column, int offset) {
     HASH_ADD_INT( hash_table, column, hi );  /* id: name of key field */
 }
 
-struct hash_int *find_offset(struct hash_int *hash_table, int column) {
+/* finds a given int in the hash table */
+struct hash_int *find_offset_from_hash_table(struct hash_int *hash_table, int column) {
     struct hash_int *hi;
     HASH_FIND_INT( hash_table, &column, hi );  /* s: output pointer */
     return hi;
 }
 
-void clear_table(struct hash_int *hash_table) {
+/* tears down hash table, deallocating all memory */
+void clear_hash_table(struct hash_int *hash_table) {
   struct hash_int *current_col, *tmp;
 
   HASH_ITER(hh, hash_table, current_col, tmp) {
@@ -381,6 +383,7 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
 
     /* the start position of each new element in each new row, so we know where to look to add multiple things */
     struct hash_int *pass_start_positions_for_col = make_hash_table();
+    struct hash_int *existing_offset;
 
     COO row = *row_res;
 
@@ -432,18 +435,17 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
             b_col = B->coords[b_row_offset + b_itr].j;
 
             /* is there already some existing value for this result position? - if so, this is which index it is at */
-            struct hash_int *val = find_offset(pass_start_positions_for_col, b_col);
+            /* this is a pointer to the `struct hash_int` in the hash table (for fast lookup) */
+            existing_offset = find_offset_from_hash_table(pass_start_positions_for_col, b_col);
             
             result = A->data[a_row_offset + a_itr] * B->data[b_row_offset + b_itr];
 
-            if (val != NULL) {
+            if (existing_offset != NULL && result != 0.0) {
                 // just add to previous is there is an existing entry
-                row->data[val->offset] += result;
-                continue;
+                row->data[existing_offset->offset] += result;
             }
-
             /* if this is the first value for this column, increment non-zeros! */
-            if (result != 0.0) {
+            else if (result != 0.0) {
                 /* row and column in context of the full matrix result */
                 /* only need to do this if there is not an existing value */
                 row->coords[non_zero_elements].i = a_row;
@@ -460,7 +462,8 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
         }
     }
 
-    clear_table(pass_start_positions_for_col);
+    /* deallocate the hash table */
+    clear_hash_table(pass_start_positions_for_col);
 
     /* if there are no elements in the row, free what we started with and set value to NULL */
     if (non_zero_elements == 0) {
