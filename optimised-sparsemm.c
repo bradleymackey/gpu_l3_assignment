@@ -128,7 +128,7 @@ static void order_coo_matrix_rows(COO M) {
 // if entry is not able to be found, the `*not_found_flag` will be SET TO 1, and we return 0
 // if we found an entry that is actually 0, we return 0 but the flag is NOT altered
 // if ROWS, we use row offset table, if COLS, we use col offset table
-static double locate_matching_entry_rows(COO M, int *row_offset_table, struct coord to_find, char zero_out, char *not_found_flag) {
+static double locate_matching_entry_rows(COO M, int *restrict row_offset_table, struct coord to_find, char zero_out, char *restrict not_found_flag) {
     
     // check that there is a matching row in this matrix
     const int row_offset = row_offset_table[to_find.i];
@@ -240,7 +240,7 @@ static int *row_offset_table(const COO M) {
 
 /* merges multiple partial row COOs into 1 single COO */
 // m is the number of rows result will have n is the number of columns result will have 
-static void merge_result_rows(int num_rows, int m, int n, COO *coo_list, COO *final) {
+static void merge_result_rows(int num_rows, int m, int n, COO *restrict coo_list, COO *restrict final) {
 
     /* final should point to result when we are done */
     *final = NULL;
@@ -357,7 +357,7 @@ static void compress_elements(COO *row, int num_cols, int non_zeros) {
 
 /* calculates a result row in the resultant matrix 
    - row_res will allocated by this routine */
-static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, int *b_row_offsets, COO *row_res) {
+static void calculate_result_row(int a_row, COO A, int *restrict a_row_offsets, COO B, int *restrict b_row_offsets, COO *restrict row_res) {
 
     /* how big this resultant row will be */
     const int num_cols_a = A->n;
@@ -369,13 +369,33 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
         *row_res = NULL;
         return;
     }
+
+
+    /* estimate for the number of non-zeros for this resultant row */
+    /* obviously we cannot know before, so calculate this initially, */
+    /* then we can realloc if we run out of room */
+    /* we divide by number of rows in result because we are only calculating per row remember! */
+    const int initial_rows = ((A->NZ+B->NZ)*5)/A->m;
     
     // bear in mind this only represents a single row of the resultant matrix
     // this is the values for only one row of this result
     /* FINAL 1 row total (because this is just a result row) */
-    /* TEMP columns is num_cols_a (should fix when we remove 0 values) */
-    /* TEMP non-zeros num_cols_a (should fix when we remove 0 values) */
-    alloc_sparse(1,num_cols_a,num_cols_a,row_res);
+    alloc_sparse(1,num_cols_a,initial_rows,row_res);
+
+
+    int allocated = 0;
+
+    /* the start position of each new element in each new row, so we know where to look to add multiple things */
+    int *pass_start_positions = (int*)malloc(num_cols_a*sizeof(int));
+    int i;
+    for (i = 0; i<num_cols_a; i++)
+        pass_start_positions[i] = -1;
+
+
+    
+
+
+
     COO row = *row_res;
 
     int non_zero_elements = 0;
