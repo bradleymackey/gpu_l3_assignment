@@ -350,75 +350,6 @@ static void merge_result_rows(int num_rows, int m, int n, COO * coo_list, COO * 
 
 }
 
-/* THIS IS CURRENTLY THE BOTTLENECK FOR THE ENTIRE THING! SPEED THIS UP! */
-// to speed up -> make it so we need to compress way less elements (estimate the number of rows required, realloc when full (use modulo to map to the quasi memory cells maybe?))
-static void compress_elements(COO *row, int num_cols, int non_zeros) {
-
-    /* arrange all elements so they maintain their order but are compressed to the top of the row */
-    /* this allows us to free all the empty space taken up by the 0 cells */
-    int elem = 0;
-    int itr;
-
-    struct coord *compressed_coords = (struct coord*)malloc(non_zeros*sizeof(struct coord));
-    double *compressed_data = (double*)malloc(non_zeros*sizeof(double));
-    int *mappings = (int*)malloc(num_cols*sizeof(int));
-
-    /* must be serial, depends on elem */
-    for (itr = 0; itr < num_cols; itr++) {
-        if ((*row)->data[itr] != 0) {
-            mappings[itr] = elem;
-            elem++;
-        } else {
-            mappings[itr] = -1;
-        }
-    }
-
-    #pragma acc kernels
-    for (itr = 0; itr < num_cols; itr++) {
-        if (mappings[itr] == -1)
-            continue;
-        compressed_coords[mappings[itr]] = (*row)->coords[itr];
-        compressed_data[mappings[itr]] = (*row)->data[itr];
-    }
-
-    (*row)->NZ = non_zeros;
-    (*row)->coords = compressed_coords;
-    (*row)->data = compressed_data;
-
-    free((*row)->coords);
-    free((*row)->data);
-}
-
-
-int prev_offset(int a_itr, int a_row, int b_col, int *start_pos, struct coord *coord_pointer) {
-    struct coord to_find = { .i = a_row, .j = b_col };
-    int j;
-    /* search range */
-    int lower_ind = -1;
-    int upper_ind = -1;
-    int start_index;
-    for (j=0;j<a_itr;j++) {
-        start_index = start_pos[j];
-        if (start_index != -1) {
-            if (lower_ind == -1) {
-                lower_ind = start_index;
-            } else if (upper_ind == -1) {
-                upper_ind = start_index;
-            } else {
-                lower_ind = upper_ind;
-                upper_ind = start_index;
-            }
-            if (lower_ind != -1 && upper_ind != -1) {
-                struct coord *existing =  (struct coord*)bsearch(&to_find, lower_ind+(coord_pointer), upper_ind-lower_ind, sizeof(struct coord), bin_compare_rows);
-                if (existing != NULL) {
-                    return existing-(coord_pointer);
-                }
-            }
-        }
-    }
-    return -1;
-}
-
 /* calculates a result row in the resultant matrix 
    - row_res will allocated by this routine */
 static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, int *b_row_offsets, COO *row_res) {
@@ -449,14 +380,9 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
     alloc_sparse(1,num_cols_a,current_allocated_size,row_res);
 
     /* the start position of each new element in each new row, so we know where to look to add multiple things */
-    // int *pass_start_positions = (int*)malloc(num_cols_a*sizeof(int));
     struct hash_int *pass_start_positions_for_col = make_hash_table();
-    // int i;
-    // for (i = 0; i<num_cols_a; i++)
-    //     pass_start_positions[i] = -1;
 
     COO row = *row_res;
-    
 
     int non_zero_elements = 0;
 
@@ -542,8 +468,6 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
         *row_res = NULL;
         return;
     }
-
-    // compress_elements(&row, num_cols_a, non_zero_elements);
 
     /* cut off the bottom element spaces that were not needed */
     /* and finally fix the number of non-zeros in the result row */
