@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
+#include "uthash.h"
 
 #define SHOULD_PROFILE 0
 
@@ -25,6 +26,39 @@ void basic_sparsemm_sum(const COO, const COO, const COO,
                         const COO, const COO, const COO,
                         COO *);
 
+struct hash_int {
+    int column; // key
+    int offset; // value
+    UT_hash_handle hh; /* makes this structure hashable */
+};
+
+struct hash_int *make_hash_table() {
+    struct hash_int *hash_table = NULL;
+    return hash_table;
+}
+
+void add_hash_int(struct hash_int *hash_table, int column, int offset) {
+    struct hash_int *hi;
+    hi = malloc(sizeof(struct hash_int));
+    hi->column = column;
+    hi->offset = offset;
+    HASH_ADD_INT( hash_table, column, hi );  /* id: name of key field */
+}
+
+struct hash_int *find_offset(struct hash_int *hash_table, int column) {
+    struct hash_int *hi;
+    HASH_FIND_INT( hash_table, &column, hi );  /* s: output pointer */
+    return hi;
+}
+
+void clear_table(struct hash_int *hash_table) {
+  struct hash_int *current_col, *tmp;
+
+  HASH_ITER(hh, hash_table, current_col, tmp) {
+    HASH_DEL(hash_table,current_col);  /* delete; users advances to next */
+    free(current_col);            /* optional- if you want to free  */
+  }
+}
 
 /* transposes any COO (does not have to be ordered or anything) */
 static void transpose_coo_matrix(const COO *M) {
@@ -240,7 +274,7 @@ static int *row_offset_table(const COO M) {
 
 /* merges multiple partial row COOs into 1 single COO */
 // m is the number of rows result will have n is the number of columns result will have 
-static void merge_result_rows(int num_rows, int m, int n, COO *restrict coo_list, COO *restrict final) {
+static void merge_result_rows(int num_rows, int m, int n, COO * coo_list, COO * final) {
 
     /* final should point to result when we are done */
     *final = NULL;
@@ -415,10 +449,11 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
     alloc_sparse(1,num_cols_a,current_allocated_size,row_res);
 
     /* the start position of each new element in each new row, so we know where to look to add multiple things */
-    int *pass_start_positions = (int*)malloc(num_cols_a*sizeof(int));
-    int i;
-    for (i = 0; i<num_cols_a; i++)
-        pass_start_positions[i] = -1;
+    // int *pass_start_positions = (int*)malloc(num_cols_a*sizeof(int));
+    struct hash_int *pass_start_positions_for_col = make_hash_table();
+    // int i;
+    // for (i = 0; i<num_cols_a; i++)
+    //     pass_start_positions[i] = -1;
 
     COO row = *row_res;
     
@@ -451,8 +486,7 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
         if (b_row_offset == -1)
             continue;
 
-        pass_start_positions[a_itr] = non_zero_elements;
-
+        add_hash_int(pass_start_positions_for_col, a_itr, non_zero_elements);
 
         /* loop will overshoot, break when end of row is reached */
         #pragma vector always
@@ -472,14 +506,13 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
             b_col = B->coords[b_row_offset + b_itr].j;
 
             /* is there already some existing value for this result position? - if so, this is which index it is at */
-            // int prev_val_offset = prev_offset(a_itr, a_row, b_col, pass_start_positions, row->coords);
-            int prev_val_offset = -1;
+            struct hash_int *val = find_offset(pass_start_positions_for_col, b_col);
             
             result = A->data[a_row_offset + a_itr] * B->data[b_row_offset + b_itr];
 
-            if (prev_val_offset != -1) {
+            if (val != NULL) {
                 // just add to previous is there is an existing entry
-                row->data[prev_val_offset] += result;
+                row->data[val->offset] += result;
                 continue;
             }
 
@@ -500,6 +533,8 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
             }   
         }
     }
+
+    clear_table(pass_start_positions_for_col);
 
     /* if there are no elements in the row, free what we started with and set value to NULL */
     if (non_zero_elements == 0) {

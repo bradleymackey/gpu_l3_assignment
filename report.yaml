@@ -733,7 +733,31 @@ Args:
 --- !Missed
 Pass:            inline
 Name:            NoDefinition
-DebugLoc:        { File: sparsemm.c, Line: 174, Column: 5 }
+DebugLoc:        { File: sparsemm.c, Line: 174, Column: 7 }
+Function:        main
+Args:            
+  - Callee:          fprintf
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: sparsemm.c, Line: 103, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: sparsemm.c, Line: 175, Column: 7 }
+Function:        main
+Args:            
+  - Callee:          exit
+  - String:          ' will not be inlined into '
+  - Caller:          main
+    DebugLoc:        { File: sparsemm.c, Line: 103, Column: 0 }
+  - String:          ' because its definition is unavailable'
+...
+--- !Missed
+Pass:            inline
+Name:            NoDefinition
+DebugLoc:        { File: sparsemm.c, Line: 178, Column: 5 }
 Function:        main
 Args:            
   - Callee:          free_sparse
@@ -745,7 +769,7 @@ Args:
 --- !Missed
 Pass:            inline
 Name:            NoDefinition
-DebugLoc:        { File: sparsemm.c, Line: 175, Column: 5 }
+DebugLoc:        { File: sparsemm.c, Line: 179, Column: 5 }
 Function:        main
 Args:            
   - Callee:          fclose
@@ -791,6 +815,14 @@ Args:
 --- !Missed
 Pass:            sdagisel
 Name:            FastISelFailure
+DebugLoc:        { File: sparsemm.c, Line: 175, Column: 7 }
+Function:        main
+Args:            
+  - String:          FastISel missed terminator
+...
+--- !Missed
+Pass:            sdagisel
+Name:            FastISelFailure
 DebugLoc:        { File: sparsemm.c, Line: 127, Column: 13 }
 Function:        main
 Args:            
@@ -811,7 +843,7 @@ Name:            InstructionCount
 DebugLoc:        { File: sparsemm.c, Line: 103, Column: 0 }
 Function:        main
 Args:            
-  - NumInstructions: '249'
+  - NumInstructions: '263'
   - String:          ' instructions in function'
 ...
 --- !Missed
