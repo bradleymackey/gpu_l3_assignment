@@ -375,15 +375,13 @@ static void calculate_result_row(int a_row, COO A, int *restrict a_row_offsets, 
     /* obviously we cannot know before, so calculate this initially, */
     /* then we can realloc if we run out of room */
     /* we divide by number of rows in result because we are only calculating per row remember! */
-    const int initial_rows = ((A->NZ+B->NZ)*5)/A->m;
+    const int initial_rows = ((A->NZ+B->NZ)*2)/A->m;
+    int current_allocated_size = initial_rows;
     
     // bear in mind this only represents a single row of the resultant matrix
     // this is the values for only one row of this result
     /* FINAL 1 row total (because this is just a result row) */
     alloc_sparse(1,num_cols_a,initial_rows,row_res);
-
-
-    int allocated = 0;
 
     /* the start position of each new element in each new row, so we know where to look to add multiple things */
     int *pass_start_positions = (int*)malloc(num_cols_a*sizeof(int));
@@ -391,11 +389,7 @@ static void calculate_result_row(int a_row, COO A, int *restrict a_row_offsets, 
     for (i = 0; i<num_cols_a; i++)
         pass_start_positions[i] = -1;
 
-
     
-
-
-
     COO row = *row_res;
 
     int non_zero_elements = 0;
@@ -426,6 +420,8 @@ static void calculate_result_row(int a_row, COO A, int *restrict a_row_offsets, 
         if (b_row_offset == -1)
             continue;
 
+        pass_start_positions[a_itr] = non_zero_elements;
+
 
         /* loop will overshoot, break when end of row is reached */
         #pragma vector always
@@ -444,22 +440,60 @@ static void calculate_result_row(int a_row, COO A, int *restrict a_row_offsets, 
             /* b_col corresponds to position in output row */
             b_col = B->coords[b_row_offset + b_itr].j;
 
-            /* row and column in context of the full matrix result */
-            row->coords[b_col].i = a_row;
-            row->coords[b_col].j = b_col;
-
-            result = A->data[a_row_offset + a_itr] * B->data[b_row_offset + b_itr];
-            prev_val = row->data[b_col];
-
-
-            /* if this is the first value for this column, increment non-zeros! */
-            if (result != 0.0 && prev_val == 0.0) {
-                non_zero_elements++;
+            int prev_val_offset = -1; /* is there already some existing value for this result position? - if so, this is which index it is at */
+            if (a_itr!=0) {
+                struct coord to_find = { .i = a_row, .j = b_col };
+                int j;
+                /* search range */
+                int lower_ind = -1;
+                int upper_ind = -1;
+                for (j=0;j<num_cols_a;j++) {
+                    if (pass_start_positions[j] != -1) {
+                        if (lower_ind == -1) {
+                            lower_ind = pass_start_positions[j];
+                        } else if (upper_ind == -1) {
+                            upper_ind = pass_start_positions[j];
+                            
+                        } else {
+                            lower_ind = upper_ind;
+                            upper_ind = pass_start_positions[j];
+                        }
+                        if (lower_ind != -1 && upper_ind != -1) {
+                            struct coord *existing =  (struct coord*)bsearch(&to_find, lower_ind+(row->coords), upper_ind-lower_ind, sizeof(struct coord), bin_compare_rows);
+                            if (existing != NULL) {
+                                prev_val_offset = existing-(row->coords);
+                                break;
+                            }
+                        }
+                        
+                    }
+                }
             }
 
-            row->data[b_col] = prev_val + result;
-        }
+            result = A->data[a_row_offset + a_itr] * B->data[b_row_offset + b_itr];
 
+            if (prev_val_offset != -1) {
+                // just add to previous is there is an existing entry
+                row->data[prev_val_offset] += result;
+                continue;
+            }
+
+            /* if this is the first value for this column, increment non-zeros! */
+            if (result != 0.0) {
+                /* row and column in context of the full matrix result */
+                /* only need to do this if there is not an existing value */
+                row->coords[non_zero_elements].i = a_row;
+                row->coords[non_zero_elements].j = b_col;
+                row->data[non_zero_elements] = result;
+                non_zero_elements++;
+                if (non_zero_elements==current_allocated_size) {
+                    current_allocated_size += initial_rows; // add more space for more elements
+                    row->coords = (struct coord*)realloc(row->coords,current_allocated_size*sizeof(struct coord));
+                    row->data = (double*)realloc(row->data,current_allocated_size*sizeof(double));
+                    row->NZ = current_allocated_size; // not really the number of non-zeros, just space allocated at the moment
+                }
+            }   
+        }
     }
 
     /* if there are no elements in the row, free what we started with and set value to NULL */
@@ -469,7 +503,14 @@ static void calculate_result_row(int a_row, COO A, int *restrict a_row_offsets, 
         return;
     }
 
-    compress_elements(&row, num_cols_a, non_zero_elements);
+    // compress_elements(&row, num_cols_a, non_zero_elements);
+
+    /* cut off the bottom elements that were not needed */
+    if (non_zero_elements < current_allocated_size) {
+        row->coords = (struct coord*)realloc(row->coords,non_zero_elements*sizeof(struct coord));
+        row->data = (double*)realloc(row->data,non_zero_elements*sizeof(double));
+        row->NZ = non_zero_elements;
+    }
 
     *row_res = row;
 
