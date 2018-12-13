@@ -44,27 +44,27 @@ struct hash_int *make_hash_table() {
 }
 
 /* adds a value to the hash table */
-void add_hash_int(struct hash_int *hash_table, int column, int offset) {
+void add_hash_int(struct hash_int **hash_table, int col_id, int offset) {
     struct hash_int *hi;
     hi = malloc(sizeof(struct hash_int));
-    hi->column = column;
+    hi->column = col_id;
     hi->offset = offset;
-    HASH_ADD_INT( hash_table, column, hi );  /* id: name of key field */
+    HASH_ADD_INT( *hash_table, column, hi );  /* id: name of key field */
 }
 
 /* finds a given int in the hash table */
-struct hash_int *find_offset_from_hash_table(struct hash_int *hash_table, int column) {
+struct hash_int *find_offset_from_hash_table(struct hash_int **hash_table, int column) {
     struct hash_int *hi;
-    HASH_FIND_INT( hash_table, &column, hi );  /* s: output pointer */
+    HASH_FIND_INT( *hash_table, &column, hi );  /* s: output pointer */
     return hi;
 }
 
 /* tears down hash table, deallocating all memory */
-void clear_hash_table(struct hash_int *hash_table) {
+void clear_hash_table(struct hash_int **hash_table) {
   struct hash_int *current_col, *tmp;
 
-  HASH_ITER(hh, hash_table, current_col, tmp) {
-    HASH_DEL(hash_table,current_col);  /* delete; users advances to next */
+  HASH_ITER(hh, *hash_table, current_col, tmp) {
+    HASH_DEL(*hash_table,current_col);  /* delete; users advances to next */
     free(current_col);            /* optional- if you want to free  */
   }
 }
@@ -422,8 +422,6 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
         if (b_row_offset == -1)
             continue;
 
-        add_hash_int(pass_start_positions_for_col, a_itr, non_zero_elements);
-
         /* loop will overshoot, break when end of row is reached */
         #pragma vector always
         for (b_itr = 0; b_itr < B->n; b_itr++) {
@@ -443,21 +441,26 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
 
             /* is there already some existing value for this result position? - if so, this is which index it is at */
             /* this is a pointer to the `struct hash_int` in the hash table (for fast lookup) */
-            existing_offset = find_offset_from_hash_table(pass_start_positions_for_col, b_col);
+            existing_offset = find_offset_from_hash_table(&pass_start_positions_for_col, b_col);
+            // printf("offset for: %d,%d: %p\n",a_row,b_col,existing_offset);
             
             result = A->data[a_row_offset + a_itr] * B->data[b_row_offset + b_itr];
 
             if (existing_offset != NULL && result != 0.0) {
+                // printf("FOUND EXISTING OFFSET: %d,%d: %d\n", a_row, b_col, existing_offset->offset);
+
                 // just add to previous is there is an existing entry
                 row->data[existing_offset->offset] += result;
             }
             /* if this is the first value for this column, increment non-zeros! */
             else if (result != 0.0) {
+                // printf("NEW VALUE! : %d,%d: %.2f\n", a_row, b_col, result);
                 /* row and column in context of the full matrix result */
                 /* only need to do this if there is not an existing value */
                 row->coords[non_zero_elements].i = a_row;
                 row->coords[non_zero_elements].j = b_col;
                 row->data[non_zero_elements] = result;
+                add_hash_int(&pass_start_positions_for_col, b_col, non_zero_elements);
                 non_zero_elements++;
                 if (non_zero_elements==current_allocated_size) {
                     current_allocated_size += initial_rows; // add more space for more elements
@@ -470,7 +473,7 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
     }
 
     /* deallocate the hash table */
-    clear_hash_table(pass_start_positions_for_col);
+    clear_hash_table(&pass_start_positions_for_col);
 
     /* if there are no elements in the row, free what we started with and set value to NULL */
     if (non_zero_elements == 0) {
@@ -486,6 +489,10 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
         row->data = (double*)realloc(row->data,non_zero_elements*sizeof(double));
         row->NZ = non_zero_elements;
     }
+
+
+    // printf("ROW %d\n",a_row);
+    // print_sparse(row);
 
     *row_res = row;
 
@@ -521,7 +528,7 @@ static void swap_coos(const COO *A, const COO *B) {
 /* performs sparse multiplication */
 /* handles any required sorting, swapping, pre-processing etc. */
 /* just pass matricies of __valid sizes__ and let's go! */
-static void perform_sparse_optimised_multi(const COO A, const COO B, COO *C) {
+static void perform_sparse_optimised_multi( COO A,  COO B, COO *C) {
 
     const int a_num_rows = A->m;
     const int b_num_cols = B->n;
@@ -539,13 +546,13 @@ static void perform_sparse_optimised_multi(const COO A, const COO B, COO *C) {
     /* only downside is the time required for swapping and transposing */
     /* fortunatley, swap very, very quick and the transpose can be very easily parallelised! */
     char COL_BASED_FRAGS = 0; 
-    if (b_num_cols > a_num_rows) {
-        // printf("dividing by col!!!\n");
-        COL_BASED_FRAGS = 1;
-        swap_coos(&A,&B);
-        transpose_coo_matrix(&A);
-        transpose_coo_matrix(&B);
-    }
+    // if (b_num_cols > a_num_rows) {
+    //     // printf("dividing by col!!!\n");
+    //     COL_BASED_FRAGS = 1;
+    //     swap_coos(&A,&B);
+    //     transpose_coo_matrix(&A);
+    //     transpose_coo_matrix(&B);
+    // }
 
     order_coo_matrix_rows(A);
     order_coo_matrix_rows(B);

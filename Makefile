@@ -1,5 +1,5 @@
 CFLAGS = -O3 -march=native -pthread  -D_GNU_SOURCE -DLIKWID_PERFMON -I/ddn/apps/Cluster-Apps/likwid/4.1/include -L/ddn/apps/Cluster-Apps/likwid/4.1/lib -llikwid
-CNOPROFFLAGS = -g -O3 -foptimization-record-file=report.yaml -march=native -D_GNU_SOURCE
+CNOPROFFLAGS = -g -foptimization-record-file=report.yaml -march=native -D_GNU_SOURCE
 LDFLAGS = -lm
 CC = gcc
 
