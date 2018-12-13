@@ -1,7 +1,12 @@
+// bradley mackey
+// gpumccc assignment 2018/19
+
 #include "utils.h"
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
+// this project makes use of 'uthash' for fast dictionary-like lookups
+// http://troydhanson.github.io/uthash/
 #include "uthash.h"
 
 #define SHOULD_PROFILE 0
@@ -32,11 +37,13 @@ struct hash_int {
     UT_hash_handle hh; /* makes this structure hashable */
 };
 
+/* creates a hash table we can use to store int values */
 struct hash_int *make_hash_table() {
     struct hash_int *hash_table = NULL;
     return hash_table;
 }
 
+/* adds a value to the hash table */
 void add_hash_int(struct hash_int *hash_table, int column, int offset) {
     struct hash_int *hi;
     hi = malloc(sizeof(struct hash_int));
