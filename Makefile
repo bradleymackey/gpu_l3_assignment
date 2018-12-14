@@ -23,7 +23,7 @@ check: sparsemm
 	./sparsemm CHECK
 
 sparsemm: sparsemm.c $(OBJ)
-	$(CC) $(CNOPROFFLAGS) -o $@ $< $(OBJ) $(LDFLAGS)
+	$(CC) $(CFLAGS) -o $@ $< $(OBJ) $(LDFLAGS)
 
 %.o: %.c $(HEADER)
-	$(CC) $(CNOPROFFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<

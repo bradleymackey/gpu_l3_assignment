@@ -2,7 +2,7 @@
 
 # note that the first run uses -f to clean prior register that may have been in use
 
-echo testing small matricies
+echo testing small  matricies
 echo resulta
 likwid-perfctr -f -g FLOPS_DP -C S0:1 -m ./sparsemm resulta.matrix ./matrix/small/testA.matrix ./matrix/small/testB.matrix
 echo resultb
