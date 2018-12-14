@@ -410,7 +410,7 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
     int b_row_offset;
     double result, prev_val;
     /* loop will overshoot, break when needed */
-    #pragma acc kernels
+    #pragma acc kernels loop
     for (a_itr = 0; a_itr < num_cols_a; a_itr++) {
 
         /* check we are not shooting past the memory of the A COO */
@@ -605,12 +605,12 @@ void optimised_sparsemm(const COO A, const COO B, COO *C) {
     LIKWID_MARKER_START("optimised-multi");
     #endif
 
-    printf("MULTIPLY OPT START\n");
+    // printf("MULTIPLY OPT START\n");
 
     /* just multiply! */
     perform_sparse_optimised_multi(A, B, C);
 
-    printf("MULTIPLY OPT STOP\n");
+    // printf("MULTIPLY OPT STOP\n");
 
     #if SHOULD_PROFILE
     LIKWID_MARKER_STOP("optimised-multi");
@@ -818,9 +818,9 @@ void optimised_sparsemm_sum(const COO A, const COO B, const COO C,
     #endif
 
     // perform the optimised matrix multiplication operation
-    printf("multiplying A*D...\n");
+    // printf("multiplying A*D...\n");
     perform_sparse_optimised_multi(*abc_added, *def_added, O);
-    printf("mult done!\n");
+    // printf("mult done!\n");
 
     #if SHOULD_PROFILE
     LIKWID_MARKER_STOP("optimised-sum-multiply");
