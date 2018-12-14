@@ -4,6 +4,7 @@
 
 echo testing large DG matrices
 echo resultc
+./sparsemm --binary OUT.bm ./matrix/big/DG1-mass-3D.bm ./matrix/big/DG1-ip-laplace-3D.bm
 likwid-perfctr -f -g FLOPS_DP -C S0:1 -m ./sparsemm --binary OUT.bm ./matrix/big/DG1-mass-3D.bm ./matrix/big/DG1-ip-laplace-3D.bm
 echo resultd
 likwid-perfctr -g FLOPS_DP -C S0:1 -m ./sparsemm --binary OUT.bm ./matrix/big/DG1-ip-laplace-3D.bm ./matrix/big/DG1-mass-3D.bm

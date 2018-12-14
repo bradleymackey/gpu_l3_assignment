@@ -1,0 +1,14 @@
+Unmatched `.
+ModuleCmd_Load.c(213):ERROR:105: Unable to locate a modulefile for 'likwid'
+./profile-multi-big.sh: line 7: likwid-perfctr: command not found
+./profile-multi-big.sh: line 9: likwid-perfctr: command not found
+./profile-multi-big.sh: line 11: likwid-perfctr: command not found
+./profile-multi-big.sh: line 13: likwid-perfctr: command not found
+./profile-multi-big.sh: line 15: likwid-perfctr: command not found
+./profile-multi-big.sh: line 17: likwid-perfctr: command not found
+./profile-multi-big.sh: line 19: likwid-perfctr: command not found
+./profile-multi-big.sh: line 21: likwid-perfctr: command not found
+./profile-multi-big.sh: line 26: likwid-perfctr: command not found
+./profile-multi-big.sh: line 28: likwid-perfctr: command not found
+./profile-multi-big.sh: line 30: likwid-perfctr: command not found
+./profile-multi-big.sh: line 32: likwid-perfctr: command not found

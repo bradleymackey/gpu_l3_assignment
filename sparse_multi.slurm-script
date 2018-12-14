@@ -1,9 +1,9 @@
 #!/bin/csh
 #SBATCH --job-name="sparse-multi"
-#SBATCH -p par7.q
+#SBATCH -p par6.q
 #SBATCH -o sparse_multi_opt.%A.out
 #SBATCH -e sparse_multi_opt.%A.err
-#SBATCH -t 00:10:00
+#SBATCH -t 00:05:00
 #SBATCH --exclusive
 #SBATCH --mail-user=bradley.mackey@durham.ac.uk
 #SBATCH --mail-type=ALL
@@ -11,6 +11,8 @@
 source /etc/profile.d/modules.sh
 # source /ddn/apps/Cluster-Apps/
 module purge
+# for openacc
+module load pgi
 module load likwid
 module load intel/xe_2015.2
 ./profile-multi-big.sh

@@ -1,7 +1,7 @@
 CFLAGS = -O3 -march=native -pthread  -D_GNU_SOURCE -DLIKWID_PERFMON -I/ddn/apps/Cluster-Apps/likwid/4.1/include -L/ddn/apps/Cluster-Apps/likwid/4.1/lib -llikwid
-CNOPROFFLAGS = -O3 -march=native -D_GNU_SOURCE
+CNOPROFFLAGS = -O3 -D_GNU_SOURCE
 LDFLAGS = -lm
-CC = gcc
+CC = pgcc
 
 OBJ = optimised-sparsemm.o basic-sparsemm.o utils.o
 HEADER = utils.h
@@ -23,7 +23,7 @@ check: sparsemm
 	./sparsemm CHECK
 
 sparsemm: sparsemm.c $(OBJ)
-	$(CC) $(CFLAGS) -o $@ $< $(OBJ) $(LDFLAGS)
+	$(CC) $(CNOPROFFLAGS) -o $@ $< $(OBJ) $(LDFLAGS)
 
 %.o: %.c $(HEADER)
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CNOPROFFLAGS) -c -o $@ $<
