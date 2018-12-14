@@ -333,7 +333,6 @@ static void merge_result_rows(int num_rows, int m, int n, COO * coo_list, COO * 
     // printf("-----> result before merge <--- \n");
     // print_sparse(result);
 
-
     struct coord *coord_ptr;
     double *data_ptr;
     int mem_offset;
@@ -676,9 +675,7 @@ static void add_matrices(COO *A, COO B) {
     // this reduces the amount of binary searching and `reallocing` we have to do
     // (since this is only an add operation, order does not matter)
     if (B->NZ > added->NZ) {
-        COO tmp = added;
-        added = B;
-        B = tmp;
+        SWAP( added, B);
     }
     
     /* B must be ordered so we can quickly find it's elements! */
