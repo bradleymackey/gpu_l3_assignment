@@ -9,6 +9,15 @@
 // http://troydhanson.github.io/uthash/
 #include "uthash.h"
 
+// swap macro thanks to SO user u0b34a0f6ae: https://stackoverflow.com/a/14300503/3261161
+#define SWAP(X,Y) \
+    do { \
+        unsigned char _buf[sizeof(*(X))]; \
+        memmove(_buf, (X), sizeof(_buf)); \
+        memmove((X),  (Y), sizeof(_buf)); \
+        memmove((Y), _buf, sizeof(_buf)); \
+    } while (0)
+
 #define SHOULD_PROFILE 0
 
 #if SHOULD_PROFILE
@@ -498,32 +507,6 @@ static void calculate_result_row(int a_row, COO A, int *a_row_offsets, COO B, in
 
 }
 
-/* swaps the internal values of 2 const coos */
-/* used in `perform_sparse_optimised_multi` if we divide by row */
-static void swap_coos(const COO *A, const COO *B) {
-
-    /* must make explict copy of each item of A to avoid unintended sharing */
-    COO tmp;
-    tmp->NZ = (*A)->NZ;
-    tmp->coords = (*A)->coords;
-    tmp->data = (*A)->data;
-    tmp->m = (*A)->m;
-    tmp->n = (*A)->n;
-
-    (*A)->NZ = (*B)->NZ;
-    (*A)->coords = (*B)->coords;
-    (*A)->data = (*B)->data;
-    (*A)->m = (*B)->m;
-    (*A)->n = (*B)->n;
-
-    (*B)->NZ = tmp->NZ;
-    (*B)->coords = tmp->coords;
-    (*B)->data = tmp->data;
-    (*B)->m = tmp->m;
-    (*B)->n = tmp->n;
-
-}
-
 
 /* performs sparse multiplication */
 /* handles any required sorting, swapping, pre-processing etc. */
@@ -541,18 +524,18 @@ static void perform_sparse_optimised_multi( COO A,  COO B, COO *C) {
     /* this will allow for better parellelisation for this matrix */
     /* we do this by transposing both matrices and then swapping them */
     /* then, transpose result back at the end */
-    /* this allows us to use the same `row fragmenation` code, but calculating the result a column at a time (instead of a row at a time) */
-    /* this is designed to allow flatter matricies to also experience the same awesome parallelisation speedups */
+    /* this allows us to use the same `row fragmentation` code, but calculating the result a column at a time (instead of a row at a time) */
+    /* this is designed to allow flatter matrices to also experience the same awesome parallelisation speedups */
     /* only downside is the time required for swapping and transposing */
-    /* fortunatley, swap very, very quick and the transpose can be very easily parallelised! */
+    /* fortunately, swap very, very quick and the transpose can be very easily parallelled! */
     char COL_BASED_FRAGS = 0; 
-    // if (b_num_cols > a_num_rows) {
-    //     // printf("dividing by col!!!\n");
-    //     COL_BASED_FRAGS = 1;
-    //     swap_coos(&A,&B);
-    //     transpose_coo_matrix(&A);
-    //     transpose_coo_matrix(&B);
-    // }
+    if (b_num_cols > a_num_rows) {
+        // printf("dividing by col!!!\n");
+        COL_BASED_FRAGS = 1;
+        SWAP(A,B);
+        transpose_coo_matrix(&A);
+        transpose_coo_matrix(&B);
+    }
 
     order_coo_matrix_rows(A);
     order_coo_matrix_rows(B);

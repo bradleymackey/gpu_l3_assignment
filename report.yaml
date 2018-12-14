@@ -154,6 +154,528 @@ Args:
     DebugLoc:        { File: sparsemm.c, Line: 18, Column: 0 }
   - String:          ' because its definition is unavailable'
 ...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+Function:        check_sparsemm
+Args:            
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        check_sparsemm
+Args:            
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        check_sparsemm
+Args:            
+  - String:          'sinking '
+  - Inst:            zext
+    DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        check_sparsemm
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 37 }
+Function:        check_sparsemm
+Args:            
+  - String:          'hoisting '
+  - Inst:            mul
+    DebugLoc:        { File: sparsemm.c, Line: 38, Column: 37 }
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+Function:        check_sparsemm
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 40, Column: 25 }
+Function:        check_sparsemm
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 30, Column: 20 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 28, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 30, Column: 23 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 28, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 31, Column: 24 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 30, Column: 20 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 30, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 31, Column: 27 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 30, Column: 23 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 30, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 33, Column: 29 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 31, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 34, Column: 29 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 33, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 34, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 34, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 40, Column: 25 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 40, Column: 25 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 34, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 46, Column: 10 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 47, Column: 10 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 46, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 30, Column: 20 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 28, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 30, Column: 23 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 28, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 31, Column: 24 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 30, Column: 20 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 30, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 31, Column: 27 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 30, Column: 23 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 30, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 33, Column: 29 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 31, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 34, Column: 29 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 33, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 34, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 34, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 40, Column: 25 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 34, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 40, Column: 25 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 46, Column: 10 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 47, Column: 10 }
+Function:        check_sparsemm
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 46, Column: 5 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+Function:        check_sparsemm
+Args:            
+  - String:          'sinking '
+  - Inst:            trunc
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+Function:        check_sparsemm
+Args:            
+  - String:          'sinking '
+  - Inst:            trunc
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+Function:        check_sparsemm
+Args:            
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        check_sparsemm
+Args:            
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        check_sparsemm
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+Function:        check_sparsemm
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 40, Column: 25 }
+Function:        check_sparsemm
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+Function:        check_sparsemm
+Args:            
+  - String:          'hoisting '
+  - Inst:            trunc
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+Function:        check_sparsemm
+Args:            
+  - String:          'sinking '
+  - Inst:            trunc
+...
 --- !Missed
 Pass:            inline
 Name:            NoDefinition
@@ -406,13 +928,767 @@ Args:
     DebugLoc:        { File: sparsemm.c, Line: 57, Column: 0 }
   - String:          ' because its definition is unavailable'
 ...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'sinking '
+  - Inst:            zext
+    DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 37 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'hoisting '
+  - Inst:            mul
+    DebugLoc:        { File: sparsemm.c, Line: 80, Column: 37 }
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 82, Column: 25 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 24 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 27 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 30 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 33 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 36 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 39 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 28 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 24 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 31 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 27 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 34 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 30 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 37 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 33 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 40 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 36 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 43 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 39 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 75, Column: 29 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 73, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 76, Column: 29 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 75, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 76, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 76, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 82, Column: 25 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 82, Column: 25 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 76, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 88, Column: 10 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 89, Column: 10 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 88, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 24 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 27 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 30 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 33 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 36 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 39 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 28 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 24 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 31 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 27 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 34 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 30 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 37 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 33 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 40 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 36 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 43 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 39 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 75, Column: 29 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 73, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 76, Column: 29 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 75, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 76, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 76, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 82, Column: 25 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 76, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 82, Column: 25 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 88, Column: 10 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 89, Column: 10 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 88, Column: 5 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'sinking '
+  - Inst:            trunc
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'sinking '
+  - Inst:            trunc
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 82, Column: 25 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Passed
+Pass:            licm
+Name:            Hoisted
+DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'hoisting '
+  - Inst:            trunc
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+Function:        check_sparsemm_sum
+Args:            
+  - String:          'sinking '
+  - Inst:            trunc
+...
 --- !Missed
 Pass:            inline
 Name:            NoDefinition
 DebugLoc:        { File: sparsemm.c, Line: 110, Column: 9 }
 Function:        main
 Args:            
-  - Callee:          fprintf
+  - Callee:          fwrite
   - String:          ' will not be inlined into '
   - Caller:          main
     DebugLoc:        { File: sparsemm.c, Line: 103, Column: 0 }
@@ -436,7 +1712,7 @@ Name:            NoDefinition
 DebugLoc:        { File: sparsemm.c, Line: 112, Column: 9 }
 Function:        main
 Args:            
-  - Callee:          fprintf
+  - Callee:          fwrite
   - String:          ' will not be inlined into '
   - Caller:          main
     DebugLoc:        { File: sparsemm.c, Line: 103, Column: 0 }
@@ -460,7 +1736,7 @@ Name:            NoDefinition
 DebugLoc:        { File: sparsemm.c, Line: 114, Column: 9 }
 Function:        main
 Args:            
-  - Callee:          fprintf
+  - Callee:          fwrite
   - String:          ' will not be inlined into '
   - Caller:          main
     DebugLoc:        { File: sparsemm.c, Line: 103, Column: 0 }
@@ -472,7 +1748,7 @@ Name:            NoDefinition
 DebugLoc:        { File: sparsemm.c, Line: 115, Column: 9 }
 Function:        main
 Args:            
-  - Callee:          fprintf
+  - Callee:          fwrite
   - String:          ' will not be inlined into '
   - Caller:          main
     DebugLoc:        { File: sparsemm.c, Line: 103, Column: 0 }
@@ -484,7 +1760,7 @@ Name:            NoDefinition
 DebugLoc:        { File: sparsemm.c, Line: 116, Column: 9 }
 Function:        main
 Args:            
-  - Callee:          fprintf
+  - Callee:          fwrite
   - String:          ' will not be inlined into '
   - Caller:          main
     DebugLoc:        { File: sparsemm.c, Line: 103, Column: 0 }
@@ -508,7 +1784,7 @@ Name:            NoDefinition
 DebugLoc:        { File: sparsemm.c, Line: 118, Column: 9 }
 Function:        main
 Args:            
-  - Callee:          fprintf
+  - Callee:          fwrite
   - String:          ' will not be inlined into '
   - Caller:          main
     DebugLoc:        { File: sparsemm.c, Line: 103, Column: 0 }
@@ -520,7 +1796,7 @@ Name:            NoDefinition
 DebugLoc:        { File: sparsemm.c, Line: 119, Column: 9 }
 Function:        main
 Args:            
-  - Callee:          fprintf
+  - Callee:          fwrite
   - String:          ' will not be inlined into '
   - Caller:          main
     DebugLoc:        { File: sparsemm.c, Line: 103, Column: 0 }
@@ -532,7 +1808,7 @@ Name:            NoDefinition
 DebugLoc:        { File: sparsemm.c, Line: 120, Column: 9 }
 Function:        main
 Args:            
-  - Callee:          fprintf
+  - Callee:          fwrite
   - String:          ' will not be inlined into '
   - Caller:          main
     DebugLoc:        { File: sparsemm.c, Line: 103, Column: 0 }
@@ -544,7 +1820,7 @@ Name:            NoDefinition
 DebugLoc:        { File: sparsemm.c, Line: 121, Column: 9 }
 Function:        main
 Args:            
-  - Callee:          fprintf
+  - Callee:          fwrite
   - String:          ' will not be inlined into '
   - Caller:          main
     DebugLoc:        { File: sparsemm.c, Line: 103, Column: 0 }
@@ -778,113 +2054,2461 @@ Args:
     DebugLoc:        { File: sparsemm.c, Line: 103, Column: 0 }
   - String:          ' because its definition is unavailable'
 ...
---- !Missed
+--- !Passed
 Pass:            inline
-Name:            NeverInline
+Name:            Inlined
 DebugLoc:        { File: sparsemm.c, Line: 131, Column: 17 }
 Function:        main
 Args:            
   - Callee:          check_sparsemm
     DebugLoc:        { File: sparsemm.c, Line: 18, Column: 0 }
-  - String:          ' not inlined into '
+  - String:          ' inlined into '
   - Caller:          main
     DebugLoc:        { File: sparsemm.c, Line: 103, Column: 0 }
-  - String:          ' because it should never be inlined (cost=never)'
+  - String:          ' with cost='
+  - Cost:            '-14325'
+  - String:          ' (threshold='
+  - Threshold:       '250'
+  - String:          ')'
 ...
---- !Missed
+--- !Passed
 Pass:            inline
-Name:            NeverInline
+Name:            Inlined
 DebugLoc:        { File: sparsemm.c, Line: 132, Column: 17 }
 Function:        main
 Args:            
   - Callee:          check_sparsemm_sum
     DebugLoc:        { File: sparsemm.c, Line: 57, Column: 0 }
-  - String:          ' not inlined into '
+  - String:          ' inlined into '
   - Caller:          main
     DebugLoc:        { File: sparsemm.c, Line: 103, Column: 0 }
-  - String:          ' because it should never be inlined (cost=never)'
+  - String:          ' with cost='
+  - Cost:            '-13885'
+  - String:          ' (threshold='
+  - Threshold:       '250'
+  - String:          ')'
 ...
---- !Missed
-Pass:            sdagisel
-Name:            FastISelFailure
-DebugLoc:        { File: sparsemm.c, Line: 136, Column: 11 }
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
 Function:        main
 Args:            
-  - String:          FastISel missed call
+  - String:          'sinking '
+  - Inst:            trunc
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
 ...
---- !Missed
-Pass:            sdagisel
-Name:            FastISelFailure
-DebugLoc:        { File: sparsemm.c, Line: 175, Column: 7 }
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
 Function:        main
 Args:            
-  - String:          FastISel missed terminator
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
 ...
---- !Missed
-Pass:            sdagisel
-Name:            FastISelFailure
-DebugLoc:        { File: sparsemm.c, Line: 127, Column: 13 }
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
 Function:        main
 Args:            
-  - String:          FastISel missed call
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        main
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+Function:        main
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 82, Column: 25 }
+Function:        main
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            trunc
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            trunc
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        main
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+Function:        main
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 40, Column: 25 }
+Function:        main
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            trunc
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 156, Column: 16 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 155, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 157, Column: 16 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 156, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 158, Column: 16 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 157, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 159, Column: 16 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 158, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 160, Column: 16 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 159, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 162, Column: 32 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 160, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 162, Column: 35 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 160, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 162, Column: 38 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 160, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 162, Column: 41 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 160, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 162, Column: 44 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 160, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 162, Column: 47 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 160, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 148, Column: 16 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 147, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 149, Column: 28 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 148, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 149, Column: 31 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 148, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 172, Column: 15 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 169, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 172, Column: 15 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 152, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 177, Column: 15 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 172, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 174, Column: 15 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 172, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 174, Column: 66 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 172, Column: 15 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 172, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 30, Column: 20 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 28, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 30, Column: 23 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 28, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 31, Column: 24 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 30, Column: 20 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 30, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 31, Column: 27 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 30, Column: 23 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 30, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 33, Column: 29 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 31, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 34, Column: 29 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 33, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 34, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 34, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 40, Column: 25 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 34, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 40, Column: 25 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 46, Column: 10 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 47, Column: 10 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 46, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 24 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 27 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 30 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 33 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 36 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 39 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 28 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 24 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 31 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 27 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 34 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 30 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 37 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 33 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 40 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 36 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 43 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 39 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 75, Column: 29 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 73, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 76, Column: 29 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 75, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 76, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 76, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 82, Column: 25 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 76, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 82, Column: 25 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 88, Column: 10 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 89, Column: 10 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 88, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 111, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 110, Column: 17 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 110, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 111, Column: 46 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 110, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 112, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 111, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 113, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 110, Column: 17 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 112, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 113, Column: 67 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 111, Column: 46 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 112, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 114, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 113, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 115, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 110, Column: 17 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 114, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 116, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 115, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 117, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 110, Column: 17 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 116, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 117, Column: 75 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 116, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 118, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 117, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 119, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 110, Column: 17 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 118, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 120, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 119, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 121, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 110, Column: 17 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 120, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 156, Column: 16 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 155, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 157, Column: 16 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 156, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 158, Column: 16 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 157, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 159, Column: 16 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 158, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 160, Column: 16 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 159, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 162, Column: 32 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 160, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 162, Column: 35 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 160, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 162, Column: 38 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 160, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 162, Column: 41 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 160, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 162, Column: 44 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 160, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 162, Column: 47 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 160, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 148, Column: 16 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 147, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 149, Column: 28 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 148, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 149, Column: 31 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 148, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 172, Column: 15 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 169, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 172, Column: 15 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 152, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 177, Column: 15 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 172, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 174, Column: 15 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 172, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 174, Column: 66 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 172, Column: 15 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 172, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 30, Column: 20 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 28, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 30, Column: 23 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 28, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 31, Column: 24 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 30, Column: 20 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 30, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 31, Column: 27 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 30, Column: 23 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 30, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 33, Column: 29 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 31, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 34, Column: 29 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 33, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 34, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 34, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 40, Column: 25 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 34, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 40, Column: 25 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 46, Column: 10 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 47, Column: 10 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 46, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 24 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 27 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 30 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 33 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 36 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 72, Column: 39 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 71, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 28 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 24 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 31 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 27 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 34 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 30 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 37 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 33 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 40 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 36 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 73, Column: 43 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 39 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 72, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 75, Column: 29 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 73, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 76, Column: 29 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct._p_COO*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 75, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 76, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'double*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 76, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 82, Column: 25 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 76, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 82, Column: 25 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 88, Column: 10 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 89, Column: 10 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 88, Column: 5 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 111, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 110, Column: 17 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 110, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 111, Column: 46 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 110, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 112, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 111, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 113, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 110, Column: 17 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 112, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 113, Column: 67 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 111, Column: 46 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 112, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 114, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 113, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 115, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 110, Column: 17 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 114, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 116, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 115, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 117, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 110, Column: 17 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 116, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 117, Column: 75 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            'i8*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 116, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 118, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 117, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 119, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 110, Column: 17 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 118, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 120, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 119, Column: 9 }
+...
+--- !Missed
+Pass:            gvn
+Name:            LoadClobbered
+DebugLoc:        { File: sparsemm.c, Line: 121, Column: 17 }
+Function:        main
+Args:            
+  - String:          'load of type '
+  - Type:            '%struct.__sFILE*'
+  - String:          ' not eliminated'
+  - String:          ' in favor of '
+  - OtherAccess:     load
+    DebugLoc:        { File: sparsemm.c, Line: 110, Column: 17 }
+  - String:          ' because it is clobbered by '
+  - ClobberedBy:     call
+    DebugLoc:        { File: sparsemm.c, Line: 120, Column: 9 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            trunc
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        main
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+Function:        main
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 82, Column: 25 }
+Function:        main
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            trunc
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            trunc
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        main
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+Function:        main
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 40, Column: 25 }
+Function:        main
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            trunc
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            NoCFGForSelect
+DebugLoc:        { File: sparsemm.c, Line: 42, Column: 13 }
+Function:        main
+Args:            
+  - String:          'loop not vectorized: '
+  - String:          control flow cannot be substituted for a select
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            NonReductionValueUsedOutsideLoop
+DebugLoc:        { File: sparsemm.c, Line: 37, Column: 9 }
+Function:        main
+Args:            
+  - String:          'loop not vectorized: '
+  - String:          value that could not be identified as reduction is used outside the loop
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            NonSimpleLoad
+DebugLoc:        { File: sparsemm.c, Line: 37, Column: 9 }
+Function:        main
+Args:            
+  - String:          'loop not vectorized: '
+  - String:          read with atomic ordering or volatile read
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            MissedDetails
+DebugLoc:        { File: sparsemm.c, Line: 37, Column: 9 }
+Function:        main
+Args:            
+  - String:          loop not vectorized
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            NoCFGForSelect
+DebugLoc:        { File: sparsemm.c, Line: 84, Column: 13 }
+Function:        main
+Args:            
+  - String:          'loop not vectorized: '
+  - String:          control flow cannot be substituted for a select
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            NonReductionValueUsedOutsideLoop
+DebugLoc:        { File: sparsemm.c, Line: 79, Column: 9 }
+Function:        main
+Args:            
+  - String:          'loop not vectorized: '
+  - String:          value that could not be identified as reduction is used outside the loop
+...
+--- !Analysis
+Pass:            loop-vectorize
+Name:            NonSimpleLoad
+DebugLoc:        { File: sparsemm.c, Line: 79, Column: 9 }
+Function:        main
+Args:            
+  - String:          'loop not vectorized: '
+  - String:          read with atomic ordering or volatile read
+...
+--- !Missed
+Pass:            loop-vectorize
+Name:            MissedDetails
+DebugLoc:        { File: sparsemm.c, Line: 79, Column: 9 }
+Function:        main
+Args:            
+  - String:          loop not vectorized
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: sparsemm.c, Line: 81, Column: 22 }
+Function:        main
+Args:            
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        main
+Args:            
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        main
+Args:            
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        main
+Args:            
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: sparsemm.c, Line: 39, Column: 22 }
+Function:        main
+Args:            
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        main
+Args:            
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        main
+Args:            
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Missed
+Pass:            slp-vectorizer
+Name:            NotPossible
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        main
+Args:            
+  - String:          'Cannot SLP vectorize list: vectorization was impossible'
+  - String:          ' with available vectorization factors'
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            trunc
+    DebugLoc:        { File: sparsemm.c, Line: 82, Column: 17 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 32 }
+Function:        main
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 80, Column: 47 }
+Function:        main
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 82, Column: 25 }
+Function:        main
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            trunc
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            trunc
+    DebugLoc:        { File: sparsemm.c, Line: 40, Column: 17 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            getelementptr
+    DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 32 }
+Function:        main
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 38, Column: 47 }
+Function:        main
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Missed
+Pass:            licm
+Name:            LoadWithLoopInvariantAddressInvalidated
+DebugLoc:        { File: sparsemm.c, Line: 40, Column: 25 }
+Function:        main
+Args:            
+  - String:          failed to move load with loop-invariant address because the loop may invalidate its value
+...
+--- !Passed
+Pass:            licm
+Name:            InstSunk
+Function:        main
+Args:            
+  - String:          'sinking '
+  - Inst:            trunc
+...
+--- !Missed
+Pass:            regalloc
+Name:            LoopSpillReload
+DebugLoc:        { File: sparsemm.c, Line: 78, Column: 5 }
+Function:        main
+Args:            
+  - NumSpills:       '1'
+  - String:          ' spills '
+  - NumReloads:      '1'
+  - String:          ' reloads '
+  - String:          generated in loop
 ...
 --- !Analysis
 Pass:            prologepilog
 Name:            StackSize
 DebugLoc:        { File: sparsemm.c, Line: 103, Column: 0 }
 Function:        main
-Args:            
-  - NumStackBytes:   '200'
-  - String:          ' stack bytes in function'
-...
---- !Analysis
-Pass:            asm-printer
-Name:            InstructionCount
-DebugLoc:        { File: sparsemm.c, Line: 103, Column: 0 }
-Function:        main
-Args:            
-  - NumInstructions: '263'
-  - String:          ' instructions in function'
-...
---- !Missed
-Pass:            sdagisel
-Name:            FastISelFailure
-DebugLoc:        { File: sparsemm.c, Line: 38, Column: 27 }
-Function:        check_sparsemm
-Args:            
-  - String:          FastISel missed call
-...
---- !Analysis
-Pass:            prologepilog
-Name:            StackSize
-DebugLoc:        { File: sparsemm.c, Line: 18, Column: 0 }
-Function:        check_sparsemm
-Args:            
-  - NumStackBytes:   '104'
-  - String:          ' stack bytes in function'
-...
---- !Analysis
-Pass:            asm-printer
-Name:            InstructionCount
-DebugLoc:        { File: sparsemm.c, Line: 18, Column: 0 }
-Function:        check_sparsemm
-Args:            
-  - NumInstructions: '111'
-  - String:          ' instructions in function'
-...
---- !Missed
-Pass:            sdagisel
-Name:            FastISelFailure
-DebugLoc:        { File: sparsemm.c, Line: 80, Column: 27 }
-Function:        check_sparsemm_sum
-Args:            
-  - String:          FastISel missed call
-...
---- !Analysis
-Pass:            prologepilog
-Name:            StackSize
-DebugLoc:        { File: sparsemm.c, Line: 57, Column: 0 }
-Function:        check_sparsemm_sum
 Args:            
   - NumStackBytes:   '152'
   - String:          ' stack bytes in function'
@@ -892,9 +4516,9 @@ Args:
 --- !Analysis
 Pass:            asm-printer
 Name:            InstructionCount
-DebugLoc:        { File: sparsemm.c, Line: 57, Column: 0 }
-Function:        check_sparsemm_sum
+DebugLoc:        { File: sparsemm.c, Line: 103, Column: 0 }
+Function:        main
 Args:            
-  - NumInstructions: '152'
+  - NumInstructions: '388'
   - String:          ' instructions in function'
 ...
