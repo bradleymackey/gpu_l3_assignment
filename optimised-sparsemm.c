@@ -180,7 +180,7 @@ static void order_coo_matrix_rows(COO M) {
 // if entry is not able to be found, the `*not_found_flag` will be SET TO 1, and we return 0
 // if we found an entry that is actually 0, we return 0 but the flag is NOT altered
 // if ROWS, we use row offset table, if COLS, we use col offset table
-static double locate_matching_entry_rows(COO M, int *restrict row_offset_table, struct coord to_find, char zero_out, char *restrict not_found_flag) {
+static double locate_matching_entry_rows(COO M, int *row_offset_table, struct coord to_find, char zero_out, char *not_found_flag) {
     
     // check that there is a matching row in this matrix
     const int row_offset = row_offset_table[to_find.i];
