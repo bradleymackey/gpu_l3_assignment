@@ -240,6 +240,14 @@ static int *row_offset_table(const COO M) {
     
     /* offset table result */
     int *const result = (int*)malloc(num_rows*sizeof(int));
+
+    // initialise all values to -1
+    // this is the value for 'no row', so we can skip over them in the next step
+    int i;
+    #pragma acc kernels
+    #pragma unroll (8)
+    for (i = 0; i < num_rows; i++)
+        result[i] = -1;
     
     // keep track of row currently being seen and prior rows
     // used to know when we have already filled in offset for a particular row value
@@ -247,7 +255,7 @@ static int *row_offset_table(const COO M) {
     curr_row = 0;
     prev_row = -1;
     
-    int k, backfill;
+    int k;
     /* must be executed serially due to offset calc */
     #pragma nounroll
     for (k = 0; k < M->NZ; k++) {
@@ -257,37 +265,15 @@ static int *row_offset_table(const COO M) {
         
         // if we have not marked the start of this row already...
         if (curr_row != prev_row) {
-
             // mark the index of where this row starts
             result[curr_row] = k;
-
-            // perform backfill of -1 values if this is not the immediate next index
-            // this is because if we have skipped some values in the our result array,
-            // they could be filled with garbage data and we want them to be -1 to indicate there is no row for this index
-            backfill = curr_row - prev_row - 1;
-            // update difference with how many mem cells we should backfill with -1s
-            int d;
-            for (d = 1; d <= backfill; d++) {
-                result[curr_row - d] = -1;
-            }
-
             // ensure that we do not update value again, and waste valuable computation
             prev_row = curr_row;
         }
         
     }
     
-    // fill any trailing memory cells that we did not reach
-    // (because there are no cells in the matrix), with -1s
-    int i;
-    #pragma acc kernels
-    #pragma unroll (4)
-    for (i = curr_row+1; i < num_rows; i++) {
-        result[i] = -1;
-    }
-    
     return result;
-    
 }
 
 /* merges multiple partial row COOs into 1 single COO */
