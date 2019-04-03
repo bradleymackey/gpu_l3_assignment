@@ -1,3 +1,6 @@
 *.o
 /sparsemm
 /matrix
+.DS_Store
+.idea/
+OUT.bm
